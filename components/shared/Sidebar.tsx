@@ -5,20 +5,29 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { UserButton } from "@clerk/clerk-react";
+import { SignedIn, currentUser, useUser } from '@clerk/nextjs';
 // import { themeChange } from 'theme-change'
 
 
 
 
-const Sidebar = ({ user }: any) => {
-const [showSettings, setShowSettings] = useState(false);
+const Sidebar = () => {
+    const [showSettings, setShowSettings] = useState(false);
+    
 
 // useEffect(() => {
 // themeChange(false)
 // // 👆 false parameter is required for react projec
     // }, [])
+
+    const { isSignedIn, user} = useUser()
+
+    console.log(user, isSignedIn);
+    
     
     useEffect(() => {
+
+        
         if (typeof document !== "undefined" && typeof localStorage !== "undefined") {
             // Set the data-theme attribute on the <html> element
             document.documentElement.setAttribute("data-theme", localStorage.getItem('theme') || 'dark');
@@ -41,7 +50,7 @@ const handleThemeChange = (themeName: string) => {
                     <button className="w-16 h-16 btn btn-active mb-8" title="Logo">
                         Logo
                     </button>
-                    <button className="w-16 h-16 btn" title="Home">
+                    <Link href='/' className="w-16 h-16 btn" title="Home">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
                                 className="material-symbols-rounded text-2xl"
@@ -52,7 +61,7 @@ const handleThemeChange = (themeName: string) => {
                             <p>Home</p>
 
                         </div>
-                    </button>
+                    </Link>
                     <button className="w-16 h-16 btn" title="Search">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
@@ -73,7 +82,7 @@ const handleThemeChange = (themeName: string) => {
                             >
                                 play_circle
                             </span>
-                            <p>Tutorials?</p>
+                            <p>Courses?</p>
 
                         </div>
                     </button>
@@ -89,8 +98,31 @@ const handleThemeChange = (themeName: string) => {
 
                         </div>
                     </button>
-                    <div className="w-16 h-16  flex items-center justify-center">
-                        <UserButton />
+                    <div>
+                        <SignedIn>
+                            {/* <UserButton /> */}
+                            <button className="w-16 h-16 btn" title="Profile">
+                                <div className='w-full h-full flex flex-col items-center justify-center'>
+                                    <span
+                                        className="material-symbols-rounded text-2xl"
+                                        style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
+                                    >
+                                        person
+                                    </span>
+                                    <p>Profile</p>
+
+                                </div>
+                            </button>
+                        </SignedIn>
+                        {!user && (
+                            <Link href="/sign-in">
+                                <button className="w-16 h-16 btn btn-active">
+                                    Login
+                                </button>
+                            </Link>
+
+                        )}
+                        
                     </div>
 
                     <button
@@ -113,7 +145,7 @@ const handleThemeChange = (themeName: string) => {
             </nav>
 
         {showSettings && (
-            <div className="fixed bg-base-300 top-0 bottom-0 right-0 left-20 flex items-center justify-center flex-col">
+            <div className="fixed z-40 bg-base-300 top-0 bottom-0 right-0 left-20 flex items-center justify-center flex-col">
             <div className="w-11/12 h-5/6 flex flex-col items-center justify-top gap-y-4">
                 <h1 className="text-4xl font-extrabold text-base-content">
                 Settings

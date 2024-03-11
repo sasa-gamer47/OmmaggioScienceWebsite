@@ -74,3 +74,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* .drop-zone:hover {
+  width: 300%;
+  border-radius: 15px;
+  background: var(--background);
+  border: 2px dashed --background;
+} */

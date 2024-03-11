@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Link from "next/link";
 import Sidebar from '@/components/shared/Sidebar';
 
 
@@ -17,7 +17,22 @@ export default async function Home() {
 
   return (
     <main className="bg-base-100 w-screen h-screen">
-      <Sidebar user={user} />
+      {user && user.role === 'admin' && (
+        <Link href='/create'>
+          <button className="w-24 h-24 btn fixed right-6 bottom-6 outline-none btn-active" title="New">
+            <div className='w-full h-full flex flex-col items-center justify-center'>
+              <span
+                  className="material-symbols-rounded"
+                  style={{ fontVariationSettings: "'FILL' 1, 'wght' 400", fontSize: '3rem' }}
+              >
+                  add_circle
+            </span>
+            <p>New</p>
+            </div>
+          </button>
+        </Link>
+
+      )}
     </main>
   );
 }
