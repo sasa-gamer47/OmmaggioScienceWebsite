@@ -17,12 +17,12 @@ const Sidebar = () => {
 
 // useEffect(() => {
 // themeChange(false)
-// // 👆 false parameter is required for react projec
+// // 👆 false parameter is required for react project
     // }, [])
 
     const { isSignedIn, user} = useUser()
 
-    console.log(user, isSignedIn);
+    // console.log(user, isSignedIn);
     
     
     useEffect(() => {

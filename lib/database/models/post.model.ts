@@ -15,6 +15,7 @@ const PostSchema = new Schema({
     createdAt: { type: Date, required: true, default: Date.now },
     adminApproving: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     isApproved: { type: Boolean, required: true, default: false },
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true, default: [] }],
 })
 
 const Post = models.Post || model('Post', PostSchema);

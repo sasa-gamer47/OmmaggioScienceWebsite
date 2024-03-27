@@ -8,6 +8,8 @@ export type CreateUserParams = {
 export type UpdateUserParams = {
     username: string
     photo: string
+    favorites: any
+    collections: any
 }
 
 export type CreatePostParams = {
@@ -19,4 +21,38 @@ export type CreatePostParams = {
     createdAt: Date
     adminApproving: any
     isApproved: boolean
+}
+
+export type GetAllPostsParams = {
+    query: string
+    limit: number
+    page: number
+    isApproved: boolean
+}
+
+export type UpdatePostParams = {
+    userId: string
+    post: any
+    path: string
+}
+
+export type CreateCommentParams = {
+    comment: string
+    author?: any
+    parentPost?: any
+    parentComment?: any
+    children: any
+}
+
+export type GetAllCommentsParams = {
+    query: string
+    limit: number
+    page: number
+    postId: string
+}
+
+export type UpdateCommentParams = {
+    // userId: string
+    comment: any
+    path: string
 }

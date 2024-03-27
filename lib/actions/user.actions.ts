@@ -46,7 +46,7 @@ try {
 }
 }
 
-export async function updateUser(clerkId: string, user: UpdateUserParams) {
+export async function updateUser({ clerkId, user }: any) { // : UpdateUserParams
 try {
     await connectToDatabase()
 
@@ -76,6 +76,20 @@ try {
     revalidatePath('/')
 
     return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null
+} catch (error) {
+    handleError(error)
+}
+}
+
+export async function getAllAdminUsers() {
+try {
+    await connectToDatabase()
+
+    const user = await User.find({ role: 'admin' })
+    
+
+    if (!user) throw new Error('User not found')
+    return JSON.parse(JSON.stringify(user))
 } catch (error) {
     handleError(error)
 }

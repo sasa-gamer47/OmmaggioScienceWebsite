@@ -35,6 +35,8 @@ import { FileUploader } from "./FileUploader"
 import { useUploadThing } from '@/lib/uploadthing'
 import { createPost } from "@/lib/actions/post.actions"
 import { useRouter } from "next/navigation"
+import { subjects } from "@/lib/static"
+import { getAllAdminUsers } from "@/lib/actions/user.actions"
 
 
 
@@ -42,6 +44,24 @@ const CreatePostForm = ({ user }: any) => {
     const [files, setFiles] = useState<File[]>([])
     const [sortedImageUrls, setSortedImageUrls] = useState<{ url: string; index: number }[]>([])
     const [staticImageUrls, setStaticImageUrls] = useState<{ url: string; index: number }[]>([])
+    const [loading, setLoading] = useState(false)
+
+    const [adminUsers, setAdminUsers] = useState([])
+
+    const fetchAdminUsers = async () => {
+        const adminUsers = await getAllAdminUsers();
+
+        console.log('adminUsers', adminUsers);
+
+        setAdminUsers(adminUsers)
+    }
+
+    useEffect(() => {
+        fetchAdminUsers()
+        
+    }, [])
+
+    const [percentage, setPercentage] = useState(0)
 
     const { startUpload } = useUploadThing('imageUploader')
 
@@ -64,21 +84,37 @@ const CreatePostForm = ({ user }: any) => {
 
     async function onSubmit(data: z.infer<typeof createPostFormSchema>) {
         // console.log('data: ', data);
-        toast({
-            title: "Post successfully created",
-            // description: (
-            //     <p className="text-lg font-bold bg-base-200 text-base-content">Post successfully created</p>
-            // ),
-        })
+
+        let tempPercentage = 0
 
         
+
+        
+        setLoading(true)
+        
+        if (files.length <= 0) return;
 
         let uploadedImageUrl = data.posts
 
         let imagesUrls = []
 
+        
+
         if (files.length > 0) {
+            setInterval(() => {
+
+            if (tempPercentage <= 100) {
+                tempPercentage++
+    
+                setPercentage(tempPercentage)
+
+            } else {
+                tempPercentage = 0;
+                setPercentage(0)
+            }
+        }, 100)
             const uploadedImages = await startUpload(files)
+
 
             if (!uploadedImages) return;
 
@@ -123,9 +159,30 @@ const CreatePostForm = ({ user }: any) => {
         
 
         
+        let newTags = data.tags.filter((n: string, i: number) => {
+            return data.tags.indexOf(n) === i;
+        })
 
+        newTags = newTags.map((tag: string) => {
+            return tag.trim()
+        })
+
+        newTags = newTags.filter((tag: string) => {
+            return tag.toLowerCase();
+        })
+
+    
+
+        newTags = newTags.filter((tag: string) => {
+            return tag  !== '' && tag!== null && tag!== undefined;
+        })
         
+        
+        console.log(newTags);
+        
+
         // console.log(finalImageUrls);
+        
         
 
         try {
@@ -134,21 +191,39 @@ const CreatePostForm = ({ user }: any) => {
                 description: data.description,
                 subject: data.subject,
                 posts: tempFinalImageUrls,
-                tags: data.tags,
+                tags: newTags,
                 author: user._id,
+                comments: [],
                 createdAt: new Date(),
                 adminApproving: [user._id],
-                isApproved: false,
+                isApproved: adminUsers.length === 1 ? true : false,
             }
 
             console.log(postData);
+
+            if (tempFinalImageUrls.length <= 0) return;
             
 
             const createdPost = await createPost(postData)
 
             console.log(createdPost);
 
-            router.push('/')
+            if (createdPost) {
+                toast({
+                    title: "Post successfully created",
+                    // description: (
+                    //     <p className="text-lg font-bold bg-base-200 text-base-content">Post successfully created</p>
+                    // ),
+                })
+        
+                setLoading(false)
+
+                setTimeout(() => {
+                    router.push('/')
+
+                }, 700)
+            }
+
             
         } catch (error: any) {
             console.error(error.message)
@@ -170,6 +245,7 @@ const CreatePostForm = ({ user }: any) => {
 
 
     return (
+        <>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="fixed left-20 right-0 bottom-0 top-0 flex flex-col items-center gap-y-4 overflow-y-auto">
                 <div className="w-11/12 mt-5">
@@ -218,9 +294,12 @@ const CreatePostForm = ({ user }: any) => {
                                     <SelectValue className="border-2 border-base-200" placeholder="Select a subject" />
                                 </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-base-100 hover:bg-base-200 border-2 border-base-200 rounded-md w-full text-base-content outline-none">
-                                <SelectItem className="hover:bg-base-200" value="chemistry">chemistry</SelectItem>
-                                <SelectItem className="hover:bg-base-200" value="coding">coding</SelectItem>
+                                <SelectContent className="bg-base-100 hover:bg-base-200 border-2 border-base-200 rounded-md w-full text-base-content outline-none">
+                                    {subjects && subjects.map((subject: any) => (
+                                        <SelectItem className="hover:bg-base-200" value={subject.name}>{subject.name}</SelectItem>
+                                    ))}
+                                {/* <SelectItem className="hover:bg-base-200" value="chemistry">chemistry</SelectItem> */}
+                                {/* <SelectItem className="hover:bg-base-200" value="coding">coding</SelectItem> */}
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -280,6 +359,19 @@ const CreatePostForm = ({ user }: any) => {
                 <Button type="submit">Submit</Button>
             </form>
             </Form>
+            {loading && (
+                <div className="fixed w-screen h-screen flex items-center justify-center bg-base-300 z-40">
+                    <div className="w-4/12 h-4/6 flex items-center justify-around flex-col">
+                        <h1 className="text-base-content text-4xl font-bold ">Loading</h1>
+                        <div className="w-full flex items-center justify-center gap-x-4">
+                            <progress className="progress   w-8/12" value={percentage} max="100" />
+
+                            <p className="text-base-content text-xl">{percentage}%</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            </>
         )
     }
 
