@@ -5,38 +5,100 @@ import Image from 'next/image';
 import React, { useState, useEffect } from 'react'
 import { getSubjectIcon, subjects } from '@/lib/static';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { formatDateTime } from '@/lib/utils';
 import CreateCommentForm from '@/components/shared/CreateCommentForm';
 import { DialogOverlay } from '@radix-ui/react-dialog';
 import Comment from '@/components/shared/Comment';
+import { getUserByClerkId } from '@/lib/actions/user.actions';
+import { useUser } from '@clerk/nextjs';
+
 
 const page = ({ params: { id } }: { params: {  id: string} }) => {
 
     const [post, setPost] = useState<any>([])
     const [comments, setComments] = useState<any>([])
 
+    const [commentsLimit, setCommentsLimit] = useState(3)
+
+    const [isLoadingComment, setIsLoadingComment] = useState(false)
+
+    const [fetchedUser, setFetchedUser] = useState(null)
+
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+
+    // const [commentsLength, setCommentsLength] = useState(0)
+
     const router = useRouter()
 
+    const { isSignedIn, user} = useUser()
+
     // console.log(id);
-    const fetchPost = async () => { const fetchedPost = await getPostById(id); setPost(fetchedPost)}
+    const fetchPost = async () => {
+        const fetchedPost = await getPostById(id, commentsLimit, 3);
+        setPost(fetchedPost)
+
+        if (fetchedPost) {
+            setTimeout(() => setIsLoadingComment(false), 1500)
+        }
+    }
 
     useEffect(() => {
         fetchPost();
 
-    }, [id])
+        // setTimeout(() => setIsLoadingComment(false), 500)
+
+    }, [id, commentsLimit])
     
     useEffect(() => {
         
         console.log(post);
         // console.log(post.posts)
 
+        console.log('length: ', post.commentsLength)
         
         
         if (!post?.posts) router.refresh();
         
         
     }, [post])
+
+    const fetchUser = async () => {
+        if (!user?.id) return;
+        
+        try {
+
+            const fetchedUser = await getUserByClerkId(user?.id)
+
+            console.log(fetchedUser[0])
+            setFetchedUser(fetchedUser[0])
+        } catch (err: any) {
+            throw new Error(`Something went wrong while fetching user: ${err.message}`);
+        }
+        
+    }
+
+    useEffect(() => {
+
+        
+        fetchUser()
+        
+
+        // console.log(fetchedUser)
+    }, [user])
+
+    useEffect(() => {
+        // console.log(fetchedUser)
+    }, [fetchedUser])
+
+
+    useEffect(() => {
+        if (searchParams.get('updateComments') === 'true') {
+            fetchPost();
+            router.replace(pathname)
+        }
+    }, [searchParams])
     
     
     return (
@@ -77,12 +139,27 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
                 </div>
 
                     <div className='w-10/12 mt-5 p-2 rounded-lg bg-base-200 text-base-content gap-y-4'>
-                        <CreateCommentForm user={post.author} postId={post._id} isReply={false} />
-                        <div className='flex flex-col gap-y-2'>
+                        {fetchedUser && (
+                            <CreateCommentForm user={fetchedUser} postId={post._id} isReply={false} />
+                        )}
+                        <div className='flex flex-col gap-y-2 h-full'>
                             {post.comments.map((comment: any, index: number) => (
-                                <Comment key={index} comment={comment} />
+                                <Comment key={index} user={fetchedUser} comment={comment} />
                             ))}
                         </div>
+                        {post.comments.length < post.commentsLength && (
+                            <>
+                                {!isLoadingComment && (
+                                    <a className='btn btn-neutral btn-sm mt-3 w-full' onClick={() => { setCommentsLimit(commentsLimit + 10); setIsLoadingComment(true) }}>Load more</a>
+                                )}
+                                {isLoadingComment && (
+                                    <button className="btn btn-sm w-full mb-5">
+                                        <span className="loading loading-spinner"></span>
+                                        loading
+                                    </button>
+                                )}
+                            </>
+                        )}
                 </div>
             </div>
 

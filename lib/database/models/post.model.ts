@@ -16,6 +16,7 @@ const PostSchema = new Schema({
     adminApproving: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     isApproved: { type: Boolean, required: true, default: false },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true, default: [] }],
+    commentsLength: { type: Number, required: true, default: 0 },
 })
 
 const Post = models.Post || model('Post', PostSchema);

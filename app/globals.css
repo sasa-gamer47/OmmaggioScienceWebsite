@@ -95,12 +95,3 @@
                         "author_photo" "author_comment" "author_comment" "author_comment" "author_comment"
                         "author_photo" "author_comment" "author_comment" "author_comment" "author_comment";
 } */
-
-.vertical-divider {
-  position: absolute;
-  left: 50%; /* Center the line relative to the parent element */
-  transform: translateX(-50%);
-  width: 5px; /* Width of the line */
-  background-color: #333; /* Color of the line */
-  height: auto;
-}

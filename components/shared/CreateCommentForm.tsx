@@ -9,6 +9,9 @@ import { z } from "zod"
 
 import { Textarea } from "@/components/ui/textarea"
 
+import { useToast } from "@/components/ui/use-toast"
+
+
 import {
 Form,
 FormControl,
@@ -24,7 +27,7 @@ import { createCommentSchema } from '@/lib/validator';
 import { getPostById, updatePost } from '@/lib/actions/post.actions';
 import { usePathname, useRouter } from 'next/navigation';
 import { createComment, getCommentById, updateComment } from '@/lib/actions/comment.actions';
-import { log } from 'console';
+
 
 const CreateCommentForm = ({
     user,
@@ -37,22 +40,41 @@ const CreateCommentForm = ({
     isReply: boolean;
     commentId?: string;
     }) => {
+    
     const pathname = usePathname();
     const router = useRouter();
 
+    const { toast } = useToast()
+
+        console.log('isReply: ', isReply);
+        
+
+    const [isPublishing, setIsPublishing] = useState(false)
+
     const form = useForm<z.infer<typeof createCommentSchema>>({
-        resolver: zodResolver(createCommentSchema),
+    resolver: zodResolver(createCommentSchema),
         defaultValues: {
-        author: user._id,
-        parentPost: postId,
-        children: [],
-        isChild: isReply,
-        parentComment: commentId,
+            author: user._id,
+            parentPost: postId,
+            children: [],
+            isChild: isReply,
+            parentComment: commentId,
         },
     });
 
+    
+
+    // const { reset } = useForm()
+
     const onSubmit = async (data: z.infer<typeof createCommentSchema>) => {
         console.log(data);
+
+        setIsPublishing(true)
+
+        form.resetField('comment')
+        // document?.querySelector('.comment-textarea').select()
+        // document?.querySelector('.comment-textarea').clear()
+        
 
         try {
         if (!isReply) {
@@ -64,7 +86,16 @@ const CreateCommentForm = ({
 
             // console.log(data);
 
-            const post = await getPostById(postId);
+            const post = await getPostById(postId, Number.MAX_SAFE_INTEGER, 0);
+            
+
+            post.commentsLength += 1;
+
+            const updatedPost = await updatePost({
+                userId: user?.id || '',
+                post: post,
+                path: pathname,
+            })
 
             if (!post) {
             throw new Error("Post not found");
@@ -73,7 +104,8 @@ const CreateCommentForm = ({
             const createdComment = await createComment(data);
 
             console.log("comment: ", createdComment);
-            console.log(post);
+            // console.log(post);
+            // router.push(`${pathname}?updateComments=true`);
         } else if (isReply) {
             if (!commentId) {
             throw new Error("Comment not found");
@@ -86,7 +118,15 @@ const CreateCommentForm = ({
 
             const createdReply = await createComment(data);
 
-            const comment = await getCommentById(commentId);
+            // console.log('createdReply: ', createdReply);
+
+            // console.log(commentId)
+
+            const comment = await getCommentById(commentId, Number.MAX_SAFE_INTEGER);
+
+            // console.log(comment)
+
+            comment.childrenLength += 1;
 
             console.log('createdReply: ', createdReply);
 
@@ -95,17 +135,35 @@ const CreateCommentForm = ({
 
             const updatedComment = await updateComment({
                 comment: comment,
-                path: pathname,
+                // path: pathname,
             })
 
             console.log('updatedComment for reply: ', updatedComment);
-        }
+            }
+            
+            // data.comment = ''
 
-        router.refresh();
+            // form.reset();
+            setIsPublishing(false)
+
+            toast({
+                title: "Comment published successfully",
+                // description: "Friday, February 10, 2023 at 5:57 PM",
+            })
+
+            router.push(`${pathname}?updateComments=true&isReply=${isReply}`);
         } catch (err: any) {
-        throw new Error(
-            `Something went wrong while updating post: ${err.message}`
-        );
+            throw new Error(
+                `Something went wrong while creating comment: ${err.message}`
+            );
+
+        
+
+            toast({
+                title: "Error publishing comment",
+                description: err.message,
+                variant: "destructive",
+            })
         }
     };
 
@@ -124,19 +182,28 @@ const CreateCommentForm = ({
                     {/* <FormLabel className="text-2xl text-base-content">Title</FormLabel> */}
                     <FormControl>
                     <Textarea
-                        className="mt-2 bg-base-100 input input-bordered w-full text-base-content outline-none"
+                        className="mt-2 bg-base-100 input input-bordered w-full text-base-content outline-none comment-textarea"
                         placeholder="Express your comments"
                         {...field}
+                        value={isPublishing ? '' : field.value}
                     />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
                 )}
             />
-            </div>
-            <Button type="submit" className="w-1/12">
-            Comment
-            </Button>
+                </div>
+                {!isPublishing && (
+                    <Button type="submit" className="w-1/12">
+                        Comment
+                    </Button>
+
+                )}
+                {isPublishing && (
+                    <Button className="w-1/12" disabled>
+                        Publishing...
+                    </Button>
+                )}
         </form>
         </Form>
     );

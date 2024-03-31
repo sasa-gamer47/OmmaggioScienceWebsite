@@ -95,7 +95,7 @@ export default async function Home() {
           </div>
         </>
       )}
-      {/* <UserButton /> */}
+      <UserButton />
       <ApprovePosts />
     </main>
   );

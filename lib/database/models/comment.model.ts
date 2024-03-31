@@ -13,6 +13,7 @@ const CommentSchema = new Schema({
     dislikes: { type: Number, required: true, default: 0 },
     usersHaveLiked: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
     usersHaveDisliked: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
+    childrenLength: { type: Number, required: true, default: 0 },
 })
 
 const Comment = models.Comment || model('Comment', CommentSchema);

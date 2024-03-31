@@ -54,37 +54,71 @@ export async function createPost(post: CreatePostParams) {
 //     // .populate({ path: 'category', model: Category, select: '_id name' })
 // }
 
-const populateCommentChildren = async (comments: any) => {
+// const populateCommentChildren = async (comments: any) => {
+//     for (let comment of comments) {
+//         // Populate the author of the comment
+//         comment.author = await User.findById(comment.author).select('_id username photo role');
+
+//         // If the comment has children, recursively populate them
+//         if (comment.children && comment.children.length > 0) {
+//         comment.children = await Comment.find({ '_id': { $in: comment.children } });
+//         await populateCommentChildren(comment.children); // Recursive call
+//         }
+//     }
+// };
+
+// const populatePost = async (query: any) => {
+//     let post = await query
+//         .populate({ path: 'author', model: 'User', select: '_id username photo role' })
+//         .populate({
+//         path: 'comments',
+//         model: 'Comment',
+//         select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked',
+//         options: { sort: { 'createdAt': -1 } }
+//         }).exec();
+
+//     // Now manually populate the children of each comment
+//     if (post.comments && post.comments.length > 0) {
+//         await populateCommentChildren(post.comments);
+//     }
+
+//     return post;
+// };
+
+
+const populateCommentChildren = async (comments: any, limit = 3, skip = 0) => {
     for (let comment of comments) {
         // Populate the author of the comment
         comment.author = await User.findById(comment.author).select('_id username photo role');
 
-        // If the comment has children, recursively populate them
+        // If the comment has children, recursively populate them with a limit
         if (comment.children && comment.children.length > 0) {
-        comment.children = await Comment.find({ '_id': { $in: comment.children } });
-        await populateCommentChildren(comment.children); // Recursive call
+        comment.children = await Comment.find({ '_id': { $in: comment.children } })
+                                        .sort({ 'createdAt': -1 })
+                                        .skip(skip)
+                                        .limit(limit);
+        await populateCommentChildren(comment.children, limit, skip); // Recursive call
         }
     }
 };
 
-const populatePost = async (query: any) => {
+const populatePost = async (query: any, commentsLimit = 3, commentsSkip = 0, childrenLimit = 0) => {
     let post = await query
         .populate({ path: 'author', model: 'User', select: '_id username photo role' })
         .populate({
         path: 'comments',
         model: 'Comment',
-        select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked',
-        options: { sort: { 'createdAt': -1 } }
+        select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked childrenLength',
+        options: { sort: { 'createdAt': -1 }, skip: commentsSkip, limit: commentsLimit }
         }).exec();
 
-    // Now manually populate the children of each comment
+    // Now manually populate the children of each comment with a limit
     if (post.comments && post.comments.length > 0) {
-        await populateCommentChildren(post.comments);
+        await populateCommentChildren(post.comments, childrenLimit, commentsSkip);
     }
 
     return post;
 };
-
 
 
 export async function getPosts({ query, limit = 6, page, isApproved}: GetAllPostsParams) {
@@ -120,7 +154,7 @@ export async function getPosts({ query, limit = 6, page, isApproved}: GetAllPost
 }
 
 
-export async function getPostById(postId: string) {
+export async function getPostById(postId: string, commentsLimit: number, childrenLimit: number) {
     try {
         await connectToDatabase()
 
@@ -131,7 +165,7 @@ export async function getPostById(postId: string) {
 
         
         
-        const post = await populatePost(postQuery)
+        const post = await populatePost(postQuery, commentsLimit, 0, childrenLimit)
 
         // console.log(post?.comments);
         

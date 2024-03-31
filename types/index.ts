@@ -54,5 +54,5 @@ export type GetAllCommentsParams = {
 export type UpdateCommentParams = {
     // userId: string
     comment: any
-    path: string
+    // path: string
 }
