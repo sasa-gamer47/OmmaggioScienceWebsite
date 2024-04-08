@@ -19,14 +19,38 @@ try {
 }
 }
 
+const populateUser = async (query: any) => {
+    let user = await query
+        .populate({
+            path: 'collections',
+            model: 'Collection',
+            select: '_id title description posts createdAt updatedAt',
+            options: { sort: { 'createdAt': -1 } },
+        }).exec()
+
+    console.log('user user: ', user)
+
+    return user;
+};
+
 export async function getUserById(userId: string) {
 try {
     await connectToDatabase()
 
-    const user = await User.findById(userId)
+        // const post = await Post.findById(postId)
 
-    if (!user) throw new Error('User not found')
-    return JSON.parse(JSON.stringify(user))
+        const userQuery = User.findById(userId)
+
+
+        
+        
+        const user = await populateUser(userQuery)
+
+        // console.log(user?.comments);
+        
+
+        if (!user) throw new Error('User not found')
+        return JSON.parse(JSON.stringify(user))
 } catch (error) {
     handleError(error)
 }
@@ -36,8 +60,20 @@ export async function getUserByClerkId(userId: string) {
 try {
     await connectToDatabase()
 
-    const user = await User.find({ clerkId: userId })
+    // const user = await User.find({ clerkId: userId })
     
+
+    const userQuery = User.find({ clerkId: userId })
+
+
+        
+        
+    const user = await populateUser(userQuery)
+
+    // console.log('user: ', user)
+
+        // console.log(user?.comments);
+        
 
     if (!user) throw new Error('User not found')
     return JSON.parse(JSON.stringify(user))

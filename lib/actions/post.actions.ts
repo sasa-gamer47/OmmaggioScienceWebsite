@@ -3,6 +3,7 @@
 import { connectToDatabase } from '@/lib/database';
 import Post from '@/lib/database/models/post.model';
 import Comment from '@/lib/database/models/comment.model';
+import Collection from '@/lib/database/models/collection.model';
 import { handleError } from '@/lib/utils';
 
 import { CreatePostParams, GetAllPostsParams, UpdatePostParams } from '@/types';
@@ -102,20 +103,50 @@ const populateCommentChildren = async (comments: any, limit = 3, skip = 0) => {
     }
 };
 
+const populateUserCollections = async (user: any) => {
+    if (user.collections && user.collections.length > 0) {
+        user.collections = await Collection.find({ '_id': { $in: user.collections } })
+            .sort({ 'createdAt': -1 });
+    }
+}
+
 const populatePost = async (query: any, commentsLimit = 3, commentsSkip = 0, childrenLimit = 0) => {
     let post = await query
-        .populate({ path: 'author', model: 'User', select: '_id username photo role' })
         .populate({
-        path: 'comments',
-        model: 'Comment',
-        select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked childrenLength',
-        options: { sort: { 'createdAt': -1 }, skip: commentsSkip, limit: commentsLimit }
+            path: 'author',
+            model: 'User',
+            select: '_id username photo role collections',
+            // populate: {
+            //     path: 'collections',
+            //     model: 'Collection',
+            //     select: '_id title posts author createdAt updatedAt',
+            //     options: { sort: { 'createdAt': -1 } }
+            // }
+        })
+        .populate({
+            path: 'comments',
+            model: 'Comment',
+            select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked childrenLength',
+            options: { sort: { 'createdAt': -1 }, skip: commentsSkip, limit: commentsLimit }
         }).exec();
 
     // Now manually populate the children of each comment with a limit
+
     if (post.comments && post.comments.length > 0) {
         await populateCommentChildren(post.comments, childrenLimit, commentsSkip);
     }
+
+
+    // console.log(post);
+    // console.log(post?.author);
+    // console.log(post?.author?.collections);
+
+    // for (const singlePost of post) {
+    //     // console.log('singlePost:', singlePost);
+    //     await populateUserCollections(singlePost.author);
+        
+    // }
+
 
     return post;
 };

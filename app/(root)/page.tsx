@@ -16,6 +16,8 @@ export default async function Home() {
 
   const userId = sessionClaims?.sub as string;
 
+  console.log('userId: ', userId)
+
   let user = await getUserByClerkId(userId);
   user = user[0]
   
@@ -24,7 +26,7 @@ export default async function Home() {
   
 
   
-
+  console.log('user: ', user)
 
   
   
@@ -95,7 +97,7 @@ export default async function Home() {
           </div>
         </>
       )}
-      <UserButton />
+      {/* <UserButton /> */}
       <ApprovePosts />
     </main>
   );

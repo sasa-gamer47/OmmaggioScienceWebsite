@@ -56,3 +56,23 @@ export type UpdateCommentParams = {
     comment: any
     // path: string
 }
+
+export type CreateCollectionParams = {
+    title: string,
+    description: string,
+    posts: any,
+    author: any,
+    createdAt: Date
+    updatedAt: Date
+}
+
+export type UpdateCollectionParams = {
+    // title?: string,
+    // description?: string,
+    // posts: any,
+    // updatedAt: Date
+
+    collection: any
+    
+    // path: string
+}

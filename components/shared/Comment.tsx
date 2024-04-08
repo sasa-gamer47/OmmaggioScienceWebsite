@@ -444,7 +444,10 @@ const Comment = ({ user, comment }: { user: any, comment: any }) => {
                         Reply
                     </button>
                     {comment.children.length > 0 && (
-                        <button className='btn btn-outline btn-sm text-sm font-semibold' onClick={() => {setShowReplies(!showReplies)}}>
+                        <button className='btn btn-outline btn-sm text-sm font-semibold' onClick={() => { setShowReplies(!showReplies) }}>
+                            {comment.children.find((child: any) => child.author._id === comment.author._id) && (
+                                <Image src={comment.author?.photo} alt={comment.author?.username} width={25} height={25} objectFit='cover' draggable='false' className='rounded-full' />
+                            )}
                             Show replies {comment.childrenLength}
                         </button>
                     )}

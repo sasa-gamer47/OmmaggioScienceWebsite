@@ -1,11 +1,11 @@
 "use client";
 
 import { updatePost } from '@/lib/actions/post.actions';
-import { getAllAdminUsers, getUserByClerkId, updateUser } from '@/lib/actions/user.actions';
+import { getAllAdminUsers, getUserByClerkId, getUserById, updateUser } from '@/lib/actions/user.actions';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
 import {
     Dialog,
@@ -15,6 +15,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+
+
 
 import {
     Form,
@@ -34,6 +36,13 @@ import { z } from 'zod';
 import { Textarea } from '../ui/textarea';
 import { getSubjectIcon } from '@/lib/static';
 
+import { useToast } from "@/components/ui/use-toast"
+import { ToastAction } from '../ui/toast';
+import { createCollection } from '@/lib/actions/collection.actions';
+import Collection from './Collection';
+
+
+
 interface Params {
     user: any
     post: any
@@ -43,14 +52,23 @@ interface Params {
 
 const Post = ({ user, post, toApprove, adminUsers }: Params) => {
 
+    const userId = useUser()!.user!.id
+
+
+
+
+    const [fetchedUser, setFetchedUser] = useState<any>(null)
 
     const [isFavorite, setIsFavorite] = useState(false)
     const [addedToCollection, setAddedToCollection] = useState(false)
 
-    
 
+    const [duration, setDuration] = useState(5000)
+
+    const { toast } = useToast()
 
     const pathname = usePathname()
+    const router = useRouter()
 
     const approvePost = async () => {
 
@@ -71,7 +89,7 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
             // post.adminApproving.splice(index, 1)
         }
 
-        console.log(post.adminApproving);
+        // console.log(post.adminApproving);
         
 
         if (post.adminApproving.length >= (adminUsers.length / 2)) {
@@ -96,10 +114,49 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
         
     }
 
+
+    const fetchUser = async () => {
+        // if (!user?.id) return;
+        
+        try {
+
+            const fetchedUser = await getUserByClerkId(userId)
+
+            // const fetchedUser = await getUserById(await getUserByClerkId(userId)._id)
+
+            console.log(fetchedUser[0])
+            setFetchedUser(fetchedUser[0])
+        } catch (err: any) {
+            throw new Error(`Something went wrong while fetching user: ${err.message}`);
+        }
+        
+    }
+
+    useEffect(() => {
+        console.log(userId, 'userId')
+        console.log(fetchedUser, 'fetchedUser')
+
+        if (!user) {
+            fetchUser();
+            
+            console.log('no user')
+        } else {
+            console.log('this user: ', user);
+            
+        }
+        
+        // console.log('fetching user...', fetchedUser)
+
+        // console.log(fetchedUser)
+    }, [user, router])
+
+
     useEffect(() => {
 
-        if (user) {
-            const index = user?.favorites.indexOf(post._id);
+        // console.log('user: ', user);
+
+        if (user || fetchedUser) {
+            const index = user ? user?.favorites.indexOf(post._id) : fetchedUser?.favorites.indexOf(post._id);
     
             if (index !== -1) {
                 setIsFavorite(true);
@@ -107,35 +164,151 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
                 setIsFavorite(false);
             }
 
+            // console.log('loading posts');
+            
         }
-    }, [user])
+    }, [user, router, fetchedUser])
 
     const handleFavorites = async () => {
     // console.log("adding o favorites");
 
-    const index = user?.favorites.indexOf(post._id);
+    const index = user ? user?.favorites.indexOf(post._id) : fetchedUser?.favorites.indexOf(post._id);
 
     if (index !== -1) {
-        user.favorites.splice(index, 1);
+        user ? user.favorites.splice(index, 1) : fetchedUser.favorites.splice(index, 1);
         // console.log("removing from favorites");
         setIsFavorite(false);
+
+        toast({
+            title: "Post removed from favorites.",
+            // duration: 300,
+            // description: "There was a problem with your request.",
+        })
+        
     } else {
-        user.favorites.push(post._id);
+        user ? user.favorites.push(post._id) : fetchedUser.favorites.push(post._id);
         // console.log("adding to favorites");
         setIsFavorite(true);
+
+        // console.log(user.collections[0].posts.find((postId: string) => postId === post._id))
+        
+        toast({
+            title: "Post added to favorites.",
+            // description: "There was a problem with your request.",
+            // action: <ToastAction altText="Save in collection">Save in Collection</ToastAction>,
+            duration: duration,
+            action: (
+                <Dialog onOpenChange={(e) => { if (e === false) setDuration(3000) }}>
+                    <DialogTrigger>
+                        <button onClick={() => setDuration(Number.MAX_SAFE_INTEGER / 500)} className="btn btn-active">Save to a collection</button>
+                        </DialogTrigger>
+                    <DialogContent className=' bg-base-200 border-none text-base-content'>
+                            <DialogHeader>
+                                
+                            
+                                    <DialogTitle>Collections</DialogTitle>
+                                
+                                
+        
+                            </DialogHeader>
+
+                        
+
+                            <div className='flex flex-col items-center justify-between gap-y-2'>
+                                {(user ? (user?.collections && user.collections.length) : (fetchedUser.collections && fetchedUser.collections.length)) === 0 && (
+                                    <p className='text-base-content text-sm font-semibold'>
+                                        No collections
+                                    </p>
+                                )}
+                                {(user ? (user?.collections && user.collections.length) : (fetchedUser.collections && fetchedUser.collections.length)) > 0 && (
+                                    <div className='flex flex-col items-center w-full'>
+                                        {user ? (user?.collections && user.collections.map((collection: any, index: number) => (
+                                            <Collection key={index} collection={collection} user={user} postId={post._id} />
+                                        ))) : (fetchedUser.collections && fetchedUser.collections.map((collection: any, index: number) => (
+                                            <Collection key={index} collection={collection} user={fetchedUser} postId={post._id} />
+                                        )))}
+                                        {/* {user && user.collections.map((collection: any, index: number) => (
+                                            <Collection key={index} collection={collection} user={user} postId={post._id} />
+                                        ))} */}
+                                    </div>
+                                )}
+                                <Dialog>
+                                    <DialogTrigger>
+                                        <button className='btn btn-active mt-2'>Create new collection</button>
+                                        
+                                    </DialogTrigger>
+                                    <DialogContent className='w-full bg-base-200 border-none text-base-content'>
+                                        <DialogHeader>
+                                        <DialogTitle className='text-2xl font-bold'>Create collection</DialogTitle>
+                                        {/* <DialogDescription>
+                                            This action cannot be undone. This will permanently delete your account
+                                            and remove your data from our servers.
+                                        </DialogDescription> */}
+                                        </DialogHeader>
+                                        <div className='w-full flex flex-col items-center justify-between gap-y-2'>
+                                            <Form {...form}>
+                                                <form className='w-full flex items-center justify-between flex-col gap-y-2' onSubmit={form.handleSubmit(handleCollectionSubmit)}>
+                                                    <div className="w-11/12">
+
+                                                        <FormField
+                                                        control={form.control}
+                                                        name="title"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                            <FormLabel className='text-xl font-bold'>Title</FormLabel>
+                                                            <FormControl>
+                                                                <Input className='bg-base-200 text-base-content outline-none' placeholder="Insert title" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                        />
+                                                    </div>
+                                                    <div className="w-11/12">
+                                                        <FormField
+                                                        control={form.control}
+                                                        name="description"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                            <FormLabel className='text-xl font-bold'>Description</FormLabel>
+                                                            <FormControl>
+                                                                <Textarea className='bg-base-200 text-base-content outline-none' placeholder="Insert description" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                        />
+
+                                                    </div>
+                                                    <button type='submit' className='btn btn-active mt-5'>Create</button>
+                                                </form>
+                                            </Form>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+
+                                
+                            </div>
+                        
+                        </DialogContent>
+                </Dialog>
+            )
+        })
     }
+    
 
         console.log(user);
         
-        if (user?.clerkId) {
+        if (user?.clerkId || fetchedUser?.clerkId) {
             const updatedUser = await updateUser({
-                clerkId: user.clerkId,
-                user: user,
+                clerkId: user?.clerkId || fetchedUser.clerkId,
+                user: user || fetchedUser,
             });
         
             console.log(updatedUser);
 
         }
+        
 
 };
 
@@ -151,58 +324,44 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
     const handleCollectionSubmit = async (values: z.infer<typeof createCollectionSchema>) => {
         console.log('collection data: ', values);
 
-        user.collections.push(values)
+        // user.collections.push(values)
 
-        if (user?.clerkId) {
+        if (user?.clerkId || userId) {
             const updatedUser = await updateUser({
-                clerkId: user.clerkId,
-                user: user,
+                clerkId: user?.clerkId || userId,
+                user: user || fetchedUser,
             });
         
             console.log(updatedUser);
 
         }
-        
-    }
 
-    const updateCollection = async (collection: any) => {
-        // console.log(collection);
-
-        const index = collection?.posts.indexOf(post._id);
-
-        // console.log(index, user.collections);
-        
-
-        // if (index !== -1) {
-        //     user.collections.splice(index, 1);
-        // } else {
-        //     user.collections.push(collection)
-        // }
-
-        if (index !== -1) {
-            collection?.posts.splice(index, 1);
-            setAddedToCollection(false)
-        } else {
-            collection?.posts.push(post._id)
-            setAddedToCollection(true)
-        }
-
-        console.log(user);
-
-        if (user?.clerkId) {
-            const updatedUser = await updateUser({
-                clerkId: user.clerkId,
-                user: user,
+        try {
+            const collection = await createCollection({
+                title: values.title,
+                description: values.description,
+                posts: values.posts,
+                author: user?._id || fetchedUser._id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
             });
 
-            console.log(updatedUser);
+            console.log('createdCollection: ', collection);
+
+        } catch (error: any) {
+            throw new Error(error.message);
         }
+        
     }
+
+    // useEffect(() => {
+    //     console.log(fetchedUser)
+    // }, [user, fetchedUser])
 
     return (
         <>
             {
-                toApprove && post.author._id !== user!._id && (
+                toApprove && (post.author._id !== user!._id || post.author._id !== fetchedUser?._id) && (
                             <div className='relative w-full h-full bg-base-200 rounded-lg flex flex-col items-center p-2 shadow-lg'>
                                 <div className=' rounded-lg w-full h-2/3 flex flex-col items-center justify-center relative'>
                                     <button className='btn btn-active absolute top-2 right-2 bg-base-300 rounded-lg p-1 py-0 flex items-center justify-center z-10'>
@@ -277,124 +436,16 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
                                 </button>
 
                         ): ( */}
+                            <button className='btn btn-active absolute top-2 right-2 bg-base-300 rounded-lg p-1 py-0 flex items-center justify-center z-10' onClick={() => handleFavorites()} >
+                                <span
+                                    className="material-symbols-rounded text-lg"
+                                    style={{ fontVariationSettings: `'FILL' ${isFavorite ? '1' : '0'}, 'wght' 300` }}
+                                >
+                                    bookmark
+                                </span>
+                            </button>
                             
-                            <Dialog>
-                                <DialogTrigger>
-                                <button className='btn btn-active absolute top-2 right-2 bg-base-300 rounded-lg p-1 py-0 flex items-center justify-center z-10' onClick={() => handleFavorites()} >
-                                    <span
-                                        className="material-symbols-rounded text-lg"
-                                        style={{ fontVariationSettings: `'FILL' ${isFavorite ? '1' : '0'}, 'wght' 300` }}
-                                    >
-                                        bookmark
-                                    </span>
-                                </button>
-                                </DialogTrigger>
-                            <DialogContent className=' bg-base-200 border-none text-base-content'>
-                                    <DialogHeader>
-                                        
-                                        {isFavorite && (
-                                            <DialogTitle>Collections</DialogTitle>
-                                        
-                                            )}
-                                    {!isFavorite && (
-                                        <>
-                                            <DialogTitle>Post removed from favorites</DialogTitle>
-                                            <DialogDescription>
-                                                You can now close this dialog.
-                                            </DialogDescription>
-                                        </>
-                                        )}
-                                    </DialogHeader>
-
-                                {isFavorite && (
-
-                                    <div className='flex flex-col items-center justify-between gap-y-2'>
-                                        {user && user?.collections && user.collections.length === 0 && (
-                                            <p className='text-base-content text-sm font-semibold'>
-                                                No collections
-                                            </p>
-                                        )}
-                                        {user && user?.collections && user.collections.length > 0 && (
-                                            <div className='flex flex-col items-center w-full'>
-                                                {user.collections.map((collection: any, index: number) => (
-                                                    <div key={index} className='w-full flex items-center justify-between border border-base-content p-2 tet-base-content'>
-                                                        <div className='w-1/3 h-full flex items-center justify-around'>
-                                                            <p className='text-lg font-semibold'>
-                                                                {collection.title}
-                                                            </p>
-                                                            <p className='text-sm'>
-                                                                {collection.posts.length} posts
-                                                            </p>
-
-                                                        </div>
-                                                        
-                                                            <button className='btn btn-active btn-sm' onClick={() => updateCollection(collection)}>
-                                                                {collection.posts.indexOf(post._id) === -1 ? 'Add' : 'Remove'}
-                                                            </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <Dialog>
-                                            <DialogTrigger>
-                                                <button className='btn btn-active mt-2'>Create new collection</button>
-                                                
-                                            </DialogTrigger>
-                                            <DialogContent className='w-full bg-base-200 border-none text-base-content'>
-                                                <DialogHeader>
-                                                <DialogTitle className='text-2xl font-bold'>Create collection</DialogTitle>
-                                                {/* <DialogDescription>
-                                                    This action cannot be undone. This will permanently delete your account
-                                                    and remove your data from our servers.
-                                                </DialogDescription> */}
-                                                </DialogHeader>
-                                                <div className='w-full flex flex-col items-center justify-between gap-y-2'>
-                                                    <Form {...form}>
-                                                        <form className='w-full flex items-center justify-between flex-col gap-y-2' onSubmit={form.handleSubmit(handleCollectionSubmit)}>
-                                                            <div className="w-11/12">
-
-                                                                <FormField
-                                                                control={form.control}
-                                                                name="title"
-                                                                render={({ field }) => (
-                                                                    <FormItem>
-                                                                    <FormLabel className='text-xl font-bold'>Title</FormLabel>
-                                                                    <FormControl>
-                                                                        <Input className='bg-base-200 text-base-content outline-none' placeholder="Insert title" {...field} />
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                                />
-                                                            </div>
-                                                            <div className="w-11/12">
-                                                                <FormField
-                                                                control={form.control}
-                                                                name="description"
-                                                                render={({ field }) => (
-                                                                    <FormItem>
-                                                                    <FormLabel className='text-xl font-bold'>Description</FormLabel>
-                                                                    <FormControl>
-                                                                        <Textarea className='bg-base-200 text-base-content outline-none' placeholder="Insert description" {...field} />
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                                />
-
-                                                            </div>
-                                                            <button type='submit' className='btn btn-active mt-5'>Create</button>
-                                                        </form>
-                                                    </Form>
-                                                </div>
-                                            </DialogContent>
-                                        </Dialog>
-
-                                        
-                                    </div>
-                                )}
-                                </DialogContent>
-                                </Dialog>
+                            
                         {/* )} */}
 
 
@@ -447,6 +498,8 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
                                     ))}
                                 </div>
                             </div>
+
+                    
                 </div>
             )}
         </>

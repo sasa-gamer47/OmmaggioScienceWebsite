@@ -13,8 +13,42 @@ import Comment from '@/components/shared/Comment';
 import { getUserByClerkId } from '@/lib/actions/user.actions';
 import { useUser } from '@clerk/nextjs';
 
+import { type CarouselApi } from "@/components/ui/carousel"
 
-const page = ({ params: { id } }: { params: {  id: string} }) => {
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
+
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card"
+
+const page = ({ params: { id } }: { params: { id: string } }) => {
+    
+    const [api, setApi] = useState<CarouselApi>()
+    const [current, setCurrent] = useState(0)
+    const [count, setCount] = useState(0)
+
+    useEffect(() => {
+        if (!api) {
+            return
+        }
+    
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap() + 1)
+    
+        api.on("select", () => {
+            setCurrent(api.selectedScrollSnap() + 1)
+        })
+    }, [api])
+    
+
+
 
     const [post, setPost] = useState<any>([])
     const [comments, setComments] = useState<any>([])
@@ -24,6 +58,9 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
     const [isLoadingComment, setIsLoadingComment] = useState(false)
 
     const [fetchedUser, setFetchedUser] = useState(null)
+
+    const [isViewingPosts, setIsViewingPosts] = useState(false)
+
 
     const searchParams = useSearchParams()
     const pathname = usePathname()
@@ -38,6 +75,7 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
     const fetchPost = async () => {
         const fetchedPost = await getPostById(id, commentsLimit, 3);
         setPost(fetchedPost)
+        console.log(fetchedPost)
 
         if (fetchedPost) {
             setTimeout(() => setIsLoadingComment(false), 1500)
@@ -45,6 +83,8 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
     }
 
     useEffect(() => {
+
+        // console.log(id)
         fetchPost();
 
         // setTimeout(() => setIsLoadingComment(false), 500)
@@ -53,10 +93,10 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
     
     useEffect(() => {
         
-        console.log(post);
+        // console.log(post);
         // console.log(post.posts)
 
-        console.log('length: ', post.commentsLength)
+        // console.log('length: ', post.commentsLength)
         
         
         if (!post?.posts) router.refresh();
@@ -107,7 +147,32 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
             <div className='absolute left-20 flex flex-col items-center right-0 top-0 bottom-0 bg-base-100 pb-2'>
                 <div className='w-10/12 mt-5 p-2 rounded-lg h-3/5 bg-base-200 grid grid-cols-2'>
                     <div className='relative w-full overflow-hidden h-full flex items-center justify-center bg-base-100 rounded-lg'>
-                        <Image src={post.posts[0]?.url} alt={post.title} fill objectFit='cover' draggable="false" />
+                        <Carousel className='w-full ' setApi={setApi} >
+                            <CarouselContent className=''>
+                            {post.posts.map((post: any, index: number) => (
+                                <CarouselItem className='w-full flex items-center justify-center' key={index}>
+                                    <div className="aspect-square w-full h-full flex justify-center items-center relative">
+                                        {/* <span className="text-4xl font-semibold">{index + 1}</span> */}
+                                        <Image onClick={() => setIsViewingPosts(true)} className='cursor-pointer hover:scale-95 transition duration-150' src={post?.url} alt={post.title} fill objectFit='cover' draggable="false" />
+
+                                    </div>
+                                    {/* <Card className='w-full h-full -translate-y-14'>
+                                        <CardContent className="flex aspect-square items-center justify-center w-full h-full">
+                                        </CardContent>
+                                    </Card> */}
+                                    {/* <img src={post.url} alt={post.title} /> */}
+                                    {/* <Image src={post?.url} alt={post.title} width={300} height={300} objectFit='cover' draggable="false" /> */}
+                                
+                        
+                                </CarouselItem>
+                            ))}
+                            </CarouselContent>
+                            <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                            <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                            </Carousel>
+                            <div className="absolute left-1/2 -translate-x-1/2 bottom-4 text-center text-sm text-slate-800">
+                                Image {current} of {count}
+                            </div>
                     </div>
                     <div className="flex flex-col p-2 pl-4 items-start w-full h-full">
                         <h1 className="text-base-content text-xl font-bold">{post.title}</h1>
@@ -160,7 +225,40 @@ const page = ({ params: { id } }: { params: {  id: string} }) => {
                                 )}
                             </>
                         )}
-                </div>
+                    </div>
+                    
+                    {isViewingPosts && (
+                        <div className="fixed w-full h-full inset-0 bg-black z-50 flex justify-center items-center">
+                            <div className="h-5/6 aspect-square rounded-lg overflow-hidden">
+                                <Carousel className='w-full ' setApi={setApi} >
+                                    <CarouselContent className=''>
+                                    {post.posts.map((post: any, index: number) => (
+                                        <CarouselItem className='w-full flex items-center justify-center' key={index}>
+                                            <div className="aspect-square w-full h-full flex justify-center items-center relative">
+                                                {/* <span className="text-4xl font-semibold">{index + 1}</span> */}
+                                                <Image src={post?.url} alt={post.title} fill objectFit='cover' draggable="false" />
+
+                                            </div>                                
+                                        </CarouselItem>
+                                    ))}
+                                    </CarouselContent>
+                                    <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                                    <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                                    </Carousel>
+                                    <div className="absolute left-1/2 -translate-x-1/2 bottom-4 text-center text-sm text-muted-foreground">
+                                        Image {current} of {count}
+                                    </div>
+                                    <button onClick={() => setIsViewingPosts(false)} className='btn btn-active btn-square absolute top-5 right-5 bg-transparent rounded-lg p-1 py-0 flex items-center justify-center z-10'>
+                                        <span
+                                            className="material-symbols-rounded text-lg"
+                                            style={{ fontVariationSettings: `'FILL' 1, 'wght' 700`, fontSize: '2.5rem' }}
+                                        >
+                                            close
+                                        </span>
+                                    </button>
+                            </div>
+                        </div>
+                    )}
             </div>
 
         )}

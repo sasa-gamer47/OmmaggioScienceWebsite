@@ -8,11 +8,7 @@ const UserSchema = new Schema({
     role: { type: String, required: true, default: 'user' },
     posts: [{ type: Schema.Types.ObjectId, ref: 'Post', required: true, default: [] }],
     favorites: [{ type: Schema.Types.ObjectId, ref: 'Post', required: true, default: [] }],
-    collections: [{
-        title: { type: String, required: true },
-        description: { type: String, required: true },
-        posts: [{ type: Schema.Types.ObjectId, ref: 'Post', required: true, default: [] }]
-    }]
+    collections: [{ type: Schema.Types.ObjectId, ref: 'Collection', required: true, default: [] }]
 })
 
 const User = models.User || model('User', UserSchema);
