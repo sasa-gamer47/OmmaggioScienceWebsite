@@ -8,6 +8,7 @@ import Post from '../shared/Post';
 import { useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { getAllAdminUsers, getUserByClerkId } from '@/lib/actions/user.actions';
+import useWindowSize from '@/lib/clientUtils';
 
 const HomePosts = () => {
     const [fetchedPosts, setFetchedPosts] = useState<any[]>([]);
@@ -15,12 +16,14 @@ const HomePosts = () => {
     const { isSignedIn, user} = useUser()
     const [fetchedUser, setFetchedUser] = useState(null)
 
+    const { width } = useWindowSize()
+
     const fetchPosts = async () => {
         const posts = await getPosts({
             query: '',
             isApproved: true,
             page: 1,
-            limit: 5
+            limit: width >= 768 ? 2 : 5
         })
         console.log('posts', posts);
         setFetchedPosts(posts?.data);
@@ -80,7 +83,7 @@ const HomePosts = () => {
     }, [])
 
     return (
-        <div className='w-10/12 h-3/6 mt-5 flex items-center justify-center gap-2'>
+        <div className='w-full p-2 md:p-0 md:w-10/12 h-3/6 mt-5 flex items-center justify-start gap-2'>
             {fetchedPosts && fetchedPosts.map((post: any, index: number) => (
                 <Post key={index} user={fetchedUser} post={post} toApprove={false} adminUsers={adminUsers} />
             ))}

@@ -152,36 +152,54 @@ const populatePost = async (query: any, commentsLimit = 3, commentsSkip = 0, chi
 };
 
 
-export async function getPosts({ query, limit = 6, page, isApproved}: GetAllPostsParams) {
+export async function getPosts({ query, limit = 6, page, isApproved, categories = [], subjects = [], tags = [], subject}: GetAllPostsParams) {
     try {
-    await connectToDatabase()
+        await connectToDatabase()
 
-    const titleCondition = query ? { title: { $regex: query, $options: 'i' } } : {}
-        // const categoryCondition = category ? await getCategoryByName(category) : null
+        // subject ? subject.trim() : null
+
+        // for (const tag of tags) {
+        //     tag.trim();
+        // }
+
+        console.log('tags: ', tags);
+
+        const titleCondition = query ? { title: { $regex: query, $options: 'i' } } : {}
+        
+            // const categoryCondition = category ? await getCategoryByName(category) : null
         const isApprovedCondition = isApproved !== undefined ? { isApproved } : {}
-    const conditions = {
-        $and: [titleCondition, isApprovedCondition]  //, categoryCondition ? { category: categoryCondition._id } : {}],
+        // const categoriesCondition = categories.length > 0 ? { category: { $in: categories } } : {}
+        const subjectsCondition = subjects.length > 0 ? { subject: { $in: subjects } } : {}
+
+        const tagsCondition = tags.length > 0 ? { tags: { $all: tags } } : {}
+
+        const subjectCondition = subject ? { subject: { $in: subject } } : {}
+
+        const conditions = {
+            $and: [titleCondition, isApprovedCondition, subjectsCondition, tagsCondition, subjectCondition]  //, categoryCondition ? { category: categoryCondition._id } : {}],
+        }
+
+        console.log('subject: ', subject);
+
+        const skipAmount = (Number(page) - 1) * limit
+        const postsQuery = Post.find(conditions)
+        .sort({ createdAt: 'desc' })
+        .skip(skipAmount)
+        .limit(limit)
+
+        const posts = await populatePost(postsQuery)
+            const postsCount = await Post.countDocuments(conditions)
+            
+            // console.log('data: ', posts);
+            
+
+        return {
+            data: JSON.parse(JSON.stringify(posts)),
+            totalPages: Math.ceil(postsCount / limit),
+        }
+    } catch (error) {
+        handleError(error)
     }
-
-    const skipAmount = (Number(page) - 1) * limit
-    const postsQuery = Post.find(conditions)
-    .sort({ createdAt: 'desc' })
-    .skip(skipAmount)
-    .limit(limit)
-
-    const posts = await populatePost(postsQuery)
-        const postsCount = await Post.countDocuments(conditions)
-        
-        // console.log('data: ', posts);
-        
-
-    return {
-        data: JSON.parse(JSON.stringify(posts)),
-        totalPages: Math.ceil(postsCount / limit),
-    }
-} catch (error) {
-    handleError(error)
-}
 }
 
 

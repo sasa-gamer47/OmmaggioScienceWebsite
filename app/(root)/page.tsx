@@ -15,11 +15,17 @@ export default async function Home() {
   const { sessionClaims } = auth();
 
   const userId = sessionClaims?.sub as string;
+  let user: any;
 
-  console.log('userId: ', userId)
 
-  let user = await getUserByClerkId(userId);
-  user = user[0]
+  if (userId) {
+    console.log('userId: ', userId)
+  
+    user = await getUserByClerkId(userId);
+    user = user[0]
+
+  }
+
   
 
   
@@ -51,7 +57,7 @@ export default async function Home() {
         </Link>
 
       )} */}
-      <div className="absolute top-0 bottom-0 left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
+      <div className="absolute top-0 bottom-0 left-0 md:left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
         <main className="w-full m-4 mt-10 h-full">
           <h1 className="text-base-content text-4xl font-bold">Featured Posts</h1>
           <HomePosts />
@@ -59,8 +65,10 @@ export default async function Home() {
           <div className='w-10/12 h-1/6 mt-5 flex items-center justify-center gap-2 relative'>
             {subjects && subjects.map((subject: any, index: number) => (
               <button key={index} className='relative w-full hover:scale-95 bg-base-200 rounded-lg transition-all duration-100 h-full flex flex-col justify-around items-center shadow-lg '>
-                <p className="text-base-content text-4xl font-bold">{subject.icon}</p>
-                <p className="text-base-content text-xl font-bold">{subject.name}</p>
+                <Link href={`/search?query=*${subject.name}`}>
+                  <p className="text-base-content text-4xl font-bold">{subject.icon}</p>
+                  <p className="text-base-content text-xl font-bold">{subject.name}</p>
+                </Link>
               </button>
             ))}
           </div>

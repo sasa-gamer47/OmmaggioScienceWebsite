@@ -43,3 +43,4 @@ export function getSubjectIcon(subject: string) {
     const sub = subjects.find(s => s.name === subject);
     return subject ? sub?.icon : 'Subject not found';
 }
+

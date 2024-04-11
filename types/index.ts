@@ -28,6 +28,10 @@ export type GetAllPostsParams = {
     limit: number
     page: number
     isApproved: boolean
+    categories?: any[]
+    subjects?: any[]
+    tags?: any[]
+    subject?: string
 }
 
 export type UpdatePostParams = {

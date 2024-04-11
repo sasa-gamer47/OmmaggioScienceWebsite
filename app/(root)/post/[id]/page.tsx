@@ -167,8 +167,8 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
                                 </CarouselItem>
                             ))}
                             </CarouselContent>
-                            <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
-                            <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                            <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent bg-base-content' />
+                            <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent bg-base-content' />
                             </Carousel>
                             <div className="absolute left-1/2 -translate-x-1/2 bottom-4 text-center text-sm text-slate-800">
                                 Image {current} of {count}
@@ -177,12 +177,16 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
                     <div className="flex flex-col p-2 pl-4 items-start w-full h-full">
                         <h1 className="text-base-content text-xl font-bold">{post.title}</h1>
                         <div className="text-base-content text-sm mt-5">{post.description}</div>
-                        <a className="btn btn-outline btn-sm mt-10">{getSubjectIcon(post.subject)} {post.subject }</a>
+                        <Link href={`/search?query=*${post.subject}`}>
+                            <p className="btn btn-outline btn-sm mt-10">{getSubjectIcon(post.subject)} {post.subject }</p>
+                        </Link>    
                         <div className="grid grid-cols-3 gap-2 mt-5">
                             {post.tags.map((tag: any, index: number) => (
-                                    <button key={index} className='btn btn-active btn-neutral btn-sm'>
-                                        #{tag}
-                                    </button>
+                                    <Link href={`/search?query=''&tag=${tag}`}>
+                                        <button key={index} className='btn btn-active btn-neutral btn-sm'>
+                                            #{tag}
+                                        </button>
+                                    </Link>
                                 ))}
                         </div>
                         <Link href={`/user/${post.author._id}`} className="relative flex justify-around shadow-lg bg-base-300 items-center w-4/12 rounded-lg mt-5 p-2">
@@ -242,8 +246,8 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
                                         </CarouselItem>
                                     ))}
                                     </CarouselContent>
-                                    <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
-                                    <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-base-100' />
+                                    <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-transparent bg-base-content' />
+                                    <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-transparent bg-base-content' />
                                     </Carousel>
                                     <div className="absolute left-1/2 -translate-x-1/2 bottom-4 text-center text-sm text-muted-foreground">
                                         Image {current} of {count}

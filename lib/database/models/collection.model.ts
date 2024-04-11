@@ -1,5 +1,7 @@
 import { Schema, Types, model, models } from "mongoose";
 
+console.log('mongodb: ', Schema, models)
+
 const CollectionSchema = new Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },

@@ -1,7 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
-import Sidebar from '@/components/shared/Sidebar'
 import { Toaster } from "@/components/ui/toaster"
+import RenderSidebar from '@/components/client/RenderSidebar';
 
 export default async function RootLayout({
   children,
@@ -11,6 +11,7 @@ export default async function RootLayout({
   // const { sessionClaims } = auth();
 
   // const userId = sessionClaims?.sub as string;
+
 
   return (
     <ClerkProvider>
@@ -40,7 +41,9 @@ export default async function RootLayout({
           ></link>
         </head>
         <body>
-          <Sidebar />
+          <RenderSidebar />
+          {/* {width >= 768 && <Sidebar />} */}
+          {/* {width < 768 && <Bottombar />} */}
           <Toaster />
           {children}
         </body>

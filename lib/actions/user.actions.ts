@@ -4,9 +4,12 @@ import { revalidatePath } from 'next/cache'
 
 import { connectToDatabase } from '@/lib/database'
 import User from '@/lib/database/models/user.model'
+import Collection from '@/lib/database/models/collection.model'
 import { handleError } from '@/lib/utils'
-
 import { CreateUserParams, UpdateUserParams } from '@/types'
+
+
+import { Schema, Types, model, models } from "mongoose";
 
 export async function createUser(user: CreateUserParams) {
 try {
@@ -60,15 +63,29 @@ export async function getUserByClerkId(userId: string) {
 try {
     await connectToDatabase()
 
-    // const user = await User.find({ clerkId: userId })
+    // console.log('mongodb: ', models, Schema)
+
+    let user: any;
+
+    if (Collection.schema) {
+        console.log('collections found')
+
+        const userQuery = User.find({ clerkId: userId })
+        user = await populateUser(userQuery)
+    } else {
+        console.log('collections not found')
+        
+        user = await User.find({ clerkId: userId })
+    }
+
     
+    // console.log('userId: ', userId)
 
-    const userQuery = User.find({ clerkId: userId })
+
 
 
         
         
-    const user = await populateUser(userQuery)
 
     // console.log('user: ', user)
 
