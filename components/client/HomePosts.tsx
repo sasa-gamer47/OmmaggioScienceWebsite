@@ -19,11 +19,16 @@ const HomePosts = () => {
     const { width } = useWindowSize()
 
     const fetchPosts = async () => {
+
+        const limit = width <= 768 ? 2 : 5
+
+        console.log(width, limit)
+
         const posts = await getPosts({
             query: '',
             isApproved: true,
             page: 1,
-            limit: width >= 768 ? 2 : 5
+            limit,
         })
         console.log('posts', posts);
         setFetchedPosts(posts?.data);

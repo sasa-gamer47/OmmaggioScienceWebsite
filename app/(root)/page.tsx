@@ -6,6 +6,7 @@ import HomePosts from "@/components/client/HomePosts";
 import { categories, subjects } from "@/lib/static";
 import RightSidebar from "@/components/shared/RightSidebar";
 import ApprovePosts from "@/components/client/ApprovePosts";
+import HomeContent from "@/components/client/HomeContent";
 
 
 
@@ -61,26 +62,7 @@ export default async function Home() {
         <main className="w-full m-4 mt-10 h-full">
           <h1 className="text-base-content text-4xl font-bold">Featured Posts</h1>
           <HomePosts />
-          <h1 className="text-base-content text-4xl font-bold mt-5">Subjects</h1>
-          <div className='w-10/12 h-1/6 mt-5 flex items-center justify-center gap-2 relative'>
-            {subjects && subjects.map((subject: any, index: number) => (
-              <button key={index} className='relative w-full hover:scale-95 bg-base-200 rounded-lg transition-all duration-100 h-full flex flex-col justify-around items-center shadow-lg '>
-                <Link href={`/search?query=*${subject.name}`}>
-                  <p className="text-base-content text-4xl font-bold">{subject.icon}</p>
-                  <p className="text-base-content text-xl font-bold">{subject.name}</p>
-                </Link>
-              </button>
-            ))}
-          </div>
-          <h1 className="text-base-content text-4xl font-bold mt-5">Categories</h1>
-          <div className='w-10/12 h-1/6 mt-5 flex items-center justify-center gap-2 relative'>
-            {categories && categories.map((category: any, index: number) => (
-              <button key={index} className='relative w-full hover:scale-95 bg-base-200 rounded-lg transition-all duration-100 h-full flex flex-col justify-around items-center shadow-lg '>
-                <p className="text-base-content text-4xl font-bold">{category.icon}</p>
-                <p className="text-base-content text-xl font-bold">{category.name}</p>
-              </button>
-            ))}
-          </div>
+          <HomeContent />
         </main>
       </div>
       

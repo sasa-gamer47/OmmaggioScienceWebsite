@@ -9,6 +9,7 @@ const RenderSidebar = () => {
 
     const { width } = useWindowSize()
 
+
     return (
         <>
             {width >= 768 && <Sidebar />}
