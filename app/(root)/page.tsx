@@ -58,7 +58,7 @@ export default async function Home() {
         </Link>
 
       )} */}
-      <div className="absolute top-0 bottom-0 left-0 md:left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
+      <div className="absolute top-14 md:top-0 bottom-14 md:bottom-0 left-0 md:left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
         <main className="w-full m-4 mt-10 h-full">
           <h1 className="text-base-content text-4xl font-bold">Featured Posts</h1>
           <HomePosts />

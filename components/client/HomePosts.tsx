@@ -15,8 +15,11 @@ const HomePosts = () => {
 
     const { isSignedIn, user} = useUser()
     const [fetchedUser, setFetchedUser] = useState(null)
-
     const { width } = useWindowSize()
+
+    const [postsLimit, setPostsLimit] = useState(width <= 768 ? 2 : 5)
+    const [updatedPosts, setUpdatedPosts] = useState<any>(fetchedPosts)
+
 
     const fetchPosts = async () => {
 
@@ -32,6 +35,7 @@ const HomePosts = () => {
         })
         console.log('posts', posts);
         setFetchedPosts(posts?.data);
+        setUpdatedPosts(posts?.data)
     };
 
     const searchParams = useSearchParams()
@@ -56,6 +60,16 @@ const HomePosts = () => {
         }
         
     }
+
+    useEffect(() => {
+        setPostsLimit(width <= 768 ? 2 : 5)
+
+        if (!fetchedPosts) return;
+
+        setUpdatedPosts(fetchedPosts.slice(0, postsLimit))
+
+        console.log(width, postsLimit, fetchedPosts.slice(0, postsLimit))
+    }, [width, postsLimit])
 
     useEffect(() => {
 
@@ -89,7 +103,7 @@ const HomePosts = () => {
 
     return (
         <div className='w-full p-2 md:p-0 md:w-10/12 h-3/6 mt-5 flex items-center justify-start gap-2'>
-            {fetchedPosts && fetchedPosts.map((post: any, index: number) => (
+            {updatedPosts && updatedPosts.map((post: any, index: number) => (
                 <Post key={index} user={fetchedUser} post={post} toApprove={false} adminUsers={adminUsers} />
             ))}
         </div>

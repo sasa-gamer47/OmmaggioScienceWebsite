@@ -4,6 +4,7 @@ import React from 'react'
 import useWindowSize from '@/lib/clientUtils'
 import Sidebar from '../shared/Sidebar'
 import Bottombar from '../shared/Bottombar'
+import Topbar from '../shared/Topbar';
 
 const RenderSidebar = () => {
 
@@ -13,7 +14,7 @@ const RenderSidebar = () => {
     return (
         <>
             {width >= 768 && <Sidebar />}
-            {width < 768 && <Bottombar />}
+            {width < 768 && (<><Bottombar /> <Topbar /></>)}
         </>
     )
 }

@@ -46,68 +46,68 @@ const handleThemeChange = (themeName: string) => {
     return (
         <>
             <nav className="fixed h-auto bottom-0 z-40 left-0 w-full bg-base-200 shadow-sm flex items-center justify-center">
-                <div className=" w-full h-full flex  items-center justify-between gap-x-4">
-                    <Link href='/' className="w-16 h-16 btn" title="Home">
+                <div className=" w-full h-full flex  items-center justify-between gap-x-2">
+                    <Link href='/' className="w-14 h-14 btn" title="Home">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
-                                className="material-symbols-rounded text-2xl"
+                                className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
                                 home
                             </span>
-                            <p>Home</p>
+                            {/* <p>Home</p> */}
 
                         </div>
                     </Link>
-                    <Link href='/search' className="w-16 h-16 btn" title="Search">
+                    <Link href='/search' className="w-14 h-14 btn" title="Search">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
-                                className="material-symbols-rounded text-2xl"
+                                className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
                                 search
                             </span>
-                            <p>Search</p>
+                            {/* <p>Search</p> */}
 
                         </div>
                     </Link>
-                    <button className="w-16 h-16 btn" title="Tutorials">
+                    <button className="w-14 h-14 btn" title="Tutorials">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
-                                className="material-symbols-rounded text-2xl"
+                                className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
                                 play_circle
                             </span>
-                            <p>Courses?</p>
+                            {/* <p>Courses?</p> */}
 
                         </div>
                     </button>
-                    <button className="w-16 h-16 btn" title="Saved">
+                    <button className="w-14 h-14 btn" title="Saved">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
-                                className="material-symbols-rounded text-2xl"
+                                className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
                                 bookmark
                             </span>
-                            <p>Saved</p>
+                            {/* <p>Saved</p> */}
 
                         </div>
                     </button>
                     <button
-                        className="w-16 h-16 btn"
+                        className="w-14 h-14 btn"
                         title="Settings"
                         onClick={() => setShowSettings(!showSettings)}
                     >
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
-                                className="material-symbols-rounded text-2xl"
+                                className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
                                 settings
                             </span>
-                            <p>Settings</p>
+                            {/* <p>Settings</p> */}
 
                         </div>
                     </button>
