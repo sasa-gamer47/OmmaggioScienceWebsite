@@ -34,7 +34,7 @@ const page = () => {
     const [fetchedUser, setFetchedUser] = useState(null)
     const { width } = useWindowSize()
 
-    const carouselRef = useRef(null)
+    const carouselRef: any = useRef<any>(null)
     
     const fetchPosts = async () => {
 
@@ -83,7 +83,17 @@ const page = () => {
 
 
     useEffect(() => {
-        carouselRef?.current?.children[0]?.classList.add('h-full')
+        // carouselRef?.current?.children[0]?.classList.add('h-full')
+
+        if (carouselRef?.current && carouselRef?.current?.children[0]) {
+            carouselRef?.current?.children[0]?.classList.add('h-full')
+        }
+
+        // const carouselElement = carouselRef?.current;
+        // if (carouselElement && carouselElement?.firstChild) {
+        //     carouselElement?.firstChild.classList.add('h-full');
+        // }
+
         // carouselRef?.current?.children[0]?.children[0]?.classList.remove('-mt-4')
     }, [carouselRef])
 
