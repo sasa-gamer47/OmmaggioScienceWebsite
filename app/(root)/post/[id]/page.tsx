@@ -144,8 +144,8 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
     return (
         <>
         {post && post?.posts && (
-            <div className='absolute left-20 flex flex-col items-center right-0 top-0 bottom-0 bg-base-100 pb-2'>
-                <div className='w-10/12 mt-5 p-2 rounded-lg h-3/5 bg-base-200 grid grid-cols-2'>
+            <div className='absolute left-0 bottom-14 top-14 md:left-20 flex flex-col items-center right-0 md:top-0 md:bottom-0 bg-base-100 pb-2'>
+                <div className='w-full h-auto mx-2 lg:mx-0 md:w-10/12 mt-5 p-2 rounded-lg lg:h-3/5 bg-base-200 grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2'>
                     <div className='relative w-full overflow-hidden h-full flex items-center justify-center bg-base-100 rounded-lg'>
                         <Carousel className='w-full ' setApi={setApi} >
                             <CarouselContent className=''>
@@ -207,7 +207,7 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
                     </div>
                 </div>
 
-                    <div className='w-10/12 mt-5 p-2 rounded-lg bg-base-200 text-base-content gap-y-4'>
+                    <div className='w-full lg:mb-2 mb-16 lg:w-10/12 mt-5 p-2 rounded-lg bg-base-200 text-base-content gap-y-4'>
                         {fetchedUser && (
                             <CreateCommentForm user={fetchedUser} postId={post._id} isReply={false} />
                         )}
@@ -219,10 +219,10 @@ const page = ({ params: { id } }: { params: { id: string } }) => {
                         {post.comments.length < post.commentsLength && (
                             <>
                                 {!isLoadingComment && (
-                                    <a className='btn btn-neutral btn-sm mt-3 w-full' onClick={() => { setCommentsLimit(commentsLimit + 10); setIsLoadingComment(true) }}>Load more</a>
+                                    <a className='btn btn-neutral btn-sm mt-3 w-full lg:mb-2 mb-16 ' onClick={() => { setCommentsLimit(commentsLimit + 10); setIsLoadingComment(true) }}>Load more</a>
                                 )}
                                 {isLoadingComment && (
-                                    <button className="btn btn-sm w-full mb-5">
+                                    <button className="btn btn-sm w-full lg:mb-5 mb-24">
                                         <span className="loading loading-spinner"></span>
                                         loading
                                     </button>

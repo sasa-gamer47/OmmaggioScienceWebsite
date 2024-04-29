@@ -44,3 +44,9 @@ export function getSubjectIcon(subject: string) {
     return subject ? sub?.icon : 'Subject not found';
 }
 
+
+export const themes = [
+    "light",
+    "dark",
+    "aqua",
+]

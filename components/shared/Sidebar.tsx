@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { UserButton } from "@clerk/clerk-react";
 import { SignedIn, currentUser, useUser } from '@clerk/nextjs';
+import { themes } from '@/lib/static';
 // import { themeChange } from 'theme-change'
 
 
@@ -34,14 +35,14 @@ const Sidebar = () => {
             }
     }, [])
 
-const handleThemeChange = (themeName: string) => {
-    // Check if document is defined (only on client-side)
-    if (typeof document !== "undefined" && typeof localStorage !== "undefined") {
-        // Set the data-theme attribute on the <html> element
-        localStorage.setItem('theme', themeName)
-        document.documentElement.setAttribute("data-theme", themeName);
-    }
-};
+    const handleThemeChange = (themeName: string) => {
+        // Check if document is defined (only on client-side)
+        if (typeof document !== "undefined" && typeof localStorage !== "undefined") {
+            // Set the data-theme attribute on the <html> element
+            localStorage.setItem('theme', themeName)
+            document.documentElement.setAttribute("data-theme", themeName);
+        }
+    };
 
     return (
         <>
@@ -126,7 +127,7 @@ const handleThemeChange = (themeName: string) => {
                     </div>
 
                     <button
-                        className="w-16 h-16 btn mt-12"
+                        className={`w-16 h-16 btn mt-12 ${showSettings? 'bg-base-content text-base-100' : ''}`}
                         title="Settings"
                         onClick={() => setShowSettings(!showSettings)}
                     >
@@ -164,31 +165,19 @@ const handleThemeChange = (themeName: string) => {
                     <ul
                     tabIndex={0}
                     className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-                    >
-                    <li
-                        className="btn"
-                        data-theme="dark"
-                        title="Dark"
-                        onClick={() => handleThemeChange("dark")}
-                    >
-                        Dark
-                    </li>
-                    <li
-                        className="btn"
-                        data-theme="light"
-                        title="Light"
-                        onClick={() => handleThemeChange("light")}
-                    >
-                        Light
-                    </li>
-                    <li
-                        className="btn"
-                        data-theme="aqua"
-                        title="Aqua"
-                        onClick={() => handleThemeChange("aqua")}
-                    >
-                        Aqua
-                    </li>
+                                >
+                                    {themes.map((theme: string, index: number) => (
+                                        <li
+                                            key={index}
+                                                className="btn"
+                                                data-theme={theme}
+                                                title={theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                                onClick={() => handleThemeChange(theme)}
+                                            >
+                                                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                            </li>
+                            
+                                    ))}
 
                     {/* <li className='btn' data-set-theme="dark">Dark</li>
                                         <li className='btn' data-set-theme="light">Light</li>

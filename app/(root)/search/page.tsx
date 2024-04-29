@@ -364,13 +364,13 @@ const page = () => {
     }
 
     return (
-        <main className="absolute top-0 bottom-0 left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
+        <main className="absolute top-14 bottom-14 left-0 lg:top-0 lg:bottom-0 lg:left-20 right-0 flex items-center justify-center overflow-x-hidden overflow-y-auto">
             <div className="w-full h-full">
-                <div className="w-full h-full m-4">
-                    <h1 className="text-base-content text-4xl font-bold">Search Posts</h1>
-                    <div className='w-11/12 h-auto flex justify-between items-center gap-x-4'>
+                <div className="w-full h-full lg:m-4">
+                    <h1 className="ml-2 lg:ml-0 text-base-content text-4xl font-bold">Search Posts</h1>
+                    <div className='w-full m-2 lg:w-11/12 h-auto flex justify-between items-center gap-x-2 lg:gap-x-4'>
 
-                        <div className='w-1/3 mt-2'>
+                        <div className='w-full lg:w-1/3 mt-2'>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex gap-x-2 items-center justify-between">
                                     <FormField
@@ -425,7 +425,7 @@ const page = () => {
                                 <div className=''>
                                     <Form {...advancedQuerySettingsForm}>
                                 <form onSubmit={advancedQuerySettingsForm.handleSubmit(onAdvancedQuerySettingsSubmit)} className="">
-                                    <div className='my-2 w-full grid grid-cols-3 gap-2 '>
+                                    <div className='my-2 w-full grid grid-cols-3 gap-2 ml-4 lg:ml-0'>
                                         <FormField
                                         control={advancedQuerySettingsForm.control}
                                         name="categories"
@@ -545,19 +545,19 @@ const page = () => {
                     {searchedPosts && searchedPosts.length > 0 && (
                         <p className='text-md text-muted-foreground'>{searchedPosts.length} found. {current + 2} / {searchedPosts.length} posts</p>
                     )}
-                    <div className='mt-2 w-11/12 h-2/5 relative'>
+                    <div className='mt-2 w-11/12 h-2/5 relative ml-2 lg:ml-0'>
                         {searchedPosts && searchedPosts.length <= 0 && (<p className='text-base-content'>no post found</p>)}
                         {/* {searchedPosts && searchedPosts.length > 0 && searchedPosts.map((post: any, index: number) => (
                         ))} */}
 
                         {searchedPosts && searchedPosts.length > 0 && (
-                            <Carousel className='w-full h-full ' setApi={setApi}>
-                                <CarouselContent className=''>
+                            <Carousel className='w-full h-full lg:min-h-auto min-h-80' setApi={setApi}>
+                                <CarouselContent className='sm:min-h-28 min-h-full h-80 lg:h-auto'>
                                     {searchedPosts.map((post: any, index: number) => (
                                         <>
                                             {post && post._id && (
-                                                <CarouselItem className='basis-1/4' key={index}>
-                                                    <div className="w-full h-full flex justify-center items-center aspect-square">
+                                                <CarouselItem className='basis-1/2 lg:basis-1/4' key={index}>
+                                                    <div className="w-full h-full flex justify-center items-center  lg:aspect-square">
                                                         <Post key={index} post={post} toApprove={false} user={fetchedUser} adminUsers={null} />
                                                     </div>
                                                 </CarouselItem>

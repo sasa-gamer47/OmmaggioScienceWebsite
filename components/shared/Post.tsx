@@ -48,9 +48,10 @@ interface Params {
     post: any
     toApprove: boolean
     adminUsers: any
+    isView?: boolean
 }
 
-const Post = ({ user, post, toApprove, adminUsers }: Params) => {
+const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
 
     let userId: any = useUser()
 
@@ -62,6 +63,7 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
     const [fetchedUser, setFetchedUser] = useState<any>(null)
 
     const [isFavorite, setIsFavorite] = useState(false)
+    const [isLiked, setIsLiked] = useState(false)
     const [addedToCollection, setAddedToCollection] = useState(false)
 
 
@@ -429,8 +431,8 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
                         )}
                     </div>
                 )} 
-            {!toApprove && (
-                        <div className='relative w-full h-full bg-base-200 rounded-lg flex flex-col items-center p-2 shadow-lg min-w-40 max-w-80'>
+            {!toApprove && !isView && (
+                <div className={`relative w-full ${isView ? 'h-screen' : 'h-full'} bg-base-200 rounded-lg flex flex-col items-center p-2 shadow-lg min-w-40 max-w-80`}>
                             <div className=' rounded-lg w-full h-2/3 flex flex-col items-center justify-center relative'>
 
 
@@ -476,7 +478,7 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
 
 
                                 {post && post?.posts && post.posts.length > 0 && (
-                                    <Image draggable='false' src={post?.posts[0]?.url} alt={post.title} objectFit='cover' fill />
+                                    <Image className='min-h-16' draggable='false' src={post?.posts[0]?.url} alt={post.title} objectFit='cover' fill />
                                 )}
                                 <Link href={`/user/${post.author?._id}`} className='absolute w-10/12 left-2 -bottom-4 py-1 px-0 gap-x-3 bg-base-300 rounded-lg flex items-center justify-center'>
                                     <div className='relative rounded-full overflow-hidden'>
@@ -516,6 +518,32 @@ const Post = ({ user, post, toApprove, adminUsers }: Params) => {
                             </div>
 
                     
+                </div>
+            )}
+            {isView && (
+                <div className="relative w-full h-full text-base-content">
+                    <Image className='min-h-16' draggable='false' src={post?.posts[0]?.url} alt={post.title} objectFit='cover' fill />
+                    <div className='absolute  border w-12  z-10 top-24 bottom-4 right-0 flex flex-col justify-start  gap-y-4'>
+                            <div className='flex items-center justify-center'>
+                                <Image draggable='false' src={post.author.photo} className='rounded-full' alt='user' objectFit='cover' width={35} height={35} />
+                            </div>
+                            <div className='flex items-center justify-center'>
+                                <span
+                                className={`material-symbols-rounded text-lg ${isLiked ? 'text-red-800' : 'text-gray-100'}`}
+                                    style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '2.5rem' }}
+                                >
+                                    favorite
+                                </span>
+                            </div>
+                            <div className='flex items-center justify-center'>
+                                <span
+                                className={`material-symbols-rounded text-lg ${isFavorite ? 'text-yellow-300' : 'text-gray-100'}`}
+                                    style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '2.5rem' }}
+                                >
+                                    bookmark
+                                </span>
+                            </div>
+                    </div>
                 </div>
             )}
         </>

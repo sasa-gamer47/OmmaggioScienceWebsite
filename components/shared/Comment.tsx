@@ -266,7 +266,7 @@ const Comment = ({ user, comment }: { user: any, comment: any }) => {
     }
 
     return (
-        <div className='w-full bg-base-100 flex min-h-max h-full p-2 mt-2 rounded-md relative'>
+        <div className='w-full bg-base-100 flex min-h-max h-full lg:p-2 mt-2 rounded-md relative'>
             <div className="absolute right-4 top-4">
                 {/* <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -337,7 +337,7 @@ const Comment = ({ user, comment }: { user: any, comment: any }) => {
 
 
 
-            <div className="mr-4 p-2 h-full flex items-start w-1/12">
+            <div className="mr-1 lg:mr-4 p-2 h-full flex items-start w-4/14 lg:w-1/12">
                 {isReplying || showReplies && (
                     <div className='w-full divider divider-start divider-horizontal'>
                         <Image src={comment.author?.photo} alt={comment.author?.username} width={45} height={45} objectFit='cover' draggable='false' className='rounded-full' />
@@ -350,10 +350,11 @@ const Comment = ({ user, comment }: { user: any, comment: any }) => {
             <div className='flex flex-col justify-center w-full h-full gap-y-2 text-left relative overflow-hidden'>
                 <div className="flex justify-between w-full">
                     <div className="flex items-center justify-start gap-x-2 w-full">
-                        <p className='text-base-content text-left text-md font-semibold'>{ comment.author?.username }</p>
+                        <p className='text-base-content text-left text-sm lg:text-md font-semibold'>{ comment.author?.username }</p>
                         <p className='text-base-content text-left text-sm'>{formatDateTime(comment.createdAt).dateOnly}</p>
                     </div>
-                    <div className="flex items-center justify-end gap-x-2 w-full">
+                    
+                    <div className="lg:flex items-center justify-end gap-x-2 hidden w-full">
                         {comment.createdAt !== comment.updatedAt && (
                             <p className='text-base-content text-left text-sm mr-16'>updated: { formatDateTime(comment.updatedAt).dateTime }</p>
                             
@@ -421,36 +422,42 @@ const Comment = ({ user, comment }: { user: any, comment: any }) => {
                         </Form>
                     )}
                 </div>
-                <div className="mt-2 flex items-center justify-start gap-x-2">
-                    <button className='btn btn-outline btn-sm' onClick={() => handleLikeSystem('like')}>
-                        <span
-                            className="material-symbols-rounded"
-                            style={{ fontVariationSettings: `'FILL' ${ hasLiked ? '1' : '0'}, 'wght' 400`, fontSize: '1.3rem' }}
-                        >
-                            thumb_up
-                        </span>
-                        { comment.likes }
-                    </button>
-                    <button className='btn btn-outline btn-sm' onClick={() => handleLikeSystem('dislike')}>
-                        <span
-                            className="material-symbols-rounded"
-                            style={{ fontVariationSettings: `'FILL' ${ hasDisliked ? '1' : '0'}, 'wght' 300`, fontSize: '1.3rem' }}
-                        >
-                            thumb_down
-                        </span>
-                        { comment.dislikes }
-                    </button>
-                    <button className='btn btn-outline btn-sm text-sm font-semibold' onClick={() => setIsReplying(!isReplying)}>
-                        Reply
-                    </button>
-                    {comment.children.length > 0 && (
-                        <button className='btn btn-outline btn-sm text-sm font-semibold' onClick={() => { setShowReplies(!showReplies) }}>
-                            {comment.children.find((child: any) => child.author._id === comment.author._id) && (
-                                <Image src={comment.author?.photo} alt={comment.author?.username} width={25} height={25} objectFit='cover' draggable='false' className='rounded-full' />
-                            )}
-                            Show replies {comment.childrenLength}
+                <div className="mt-2 flex-col lg:flex-row flex items-center justify-start gap-x-2 w-full">
+                    <div className="flex w-full h-full justify-around">
+                        <button className='btn btn-outline btn-sm' onClick={() => handleLikeSystem('like')}>
+                            <span
+                                className="material-symbols-rounded"
+                                style={{ fontVariationSettings: `'FILL' ${ hasLiked ? '1' : '0'}, 'wght' 400`, fontSize: '1.3rem' }}
+                            >
+                                thumb_up
+                            </span>
+                            { comment.likes }
                         </button>
-                    )}
+                        <button className='btn btn-outline btn-sm' onClick={() => handleLikeSystem('dislike')}>
+                            <span
+                                className="material-symbols-rounded"
+                                style={{ fontVariationSettings: `'FILL' ${ hasDisliked ? '1' : '0'}, 'wght' 300`, fontSize: '1.3rem' }}
+                            >
+                                thumb_down
+                            </span>
+                            { comment.dislikes }
+                        </button>
+                        <button className='btn btn-outline btn-sm text-sm font-semibold' onClick={() => setIsReplying(!isReplying)}>
+                            Reply
+                        </button>
+
+                    </div>
+                    <div className="flex w-full h-full justify-between">
+                        {comment.children.length > 0 && (
+                            <button className='btn btn-outline btn-md lg:btn-sm text-sm font-semibold' onClick={() => { setShowReplies(!showReplies) }}>
+                                {comment.children.find((child: any) => child.author._id === comment.author._id) && (
+                                    <Image src={comment.author?.photo} alt={comment.author?.username} width={25} height={25} objectFit='cover' draggable='false' className='rounded-full' />
+                                )}
+                                <span>Show replies {comment.childrenLength}</span>
+                            </button>
+                        )}
+
+                    </div>
                 </div>
                 {isReplying && (
                     <div className="w-full ml-4">

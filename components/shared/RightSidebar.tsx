@@ -75,7 +75,7 @@ const RightSidebar = () => {
 
 
     return (
-        <nav ref={navRef} className="fixed z-40 top-10 bottom-10 right-4 w-2/12 bg-base-200 shadow-sm flex flex-col items-center justify-around">
+        <nav ref={navRef} className="fixed z-40 top-10 bottom-10 right-4 w-8/12 lg:w-2/12 bg-base-200 shadow-sm flex flex-col items-center justify-around">
             <label htmlFor="my-drawer-4" className="fixed drawer-button btn left-2 top-2 ">
                 <span
                     className="material-symbols-rounded"

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { UserButton } from "@clerk/clerk-react";
 import { SignedIn, currentUser, useUser } from '@clerk/nextjs';
+import { themes } from '@/lib/static';
 // import { themeChange } from 'theme-change'
 
 
@@ -96,7 +97,7 @@ const handleThemeChange = (themeName: string) => {
                         </div>
                     </button>
                     <button
-                        className="w-14 h-14 btn"
+                        className={`w-14 h-14 btn ${showSettings? 'bg-base-100' : ''}`}
                         title="Settings"
                         onClick={() => setShowSettings(!showSettings)}
                     >
@@ -117,6 +118,52 @@ const handleThemeChange = (themeName: string) => {
 
                 </div>
             </nav>
+
+
+
+            {showSettings && (
+            <div className="fixed z-40 bg-base-300 top-14 bottom-14 right-0 left-0 flex items-center justify-center flex-col">
+            <div className="w-11/12 h-5/6 flex flex-col items-center justify-top gap-y-4">
+                <h1 className="text-3xl font-extrabold text-base-content">
+                Settings
+                </h1>
+                <div className="flex w-full justify-around items-center">
+                <p className="text-base-content text-lg">Choose theme</p>
+                <div className="dropdown dropdown-down">
+                    <button
+                    tabIndex={0}
+                    role="button"
+                    className="w-full h-full btn btn-active"
+                    title="Change theme"
+                    >
+                    Change theme
+                    </button>
+                    <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
+                                >
+                                    {themes.map((theme: string, index: number) => (
+                                        <li
+                                            key={index}
+                                                className="btn"
+                                                data-theme={theme}
+                                                title={theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                                onClick={() => handleThemeChange(theme)}
+                                            >
+                                                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                            </li>
+                            
+                                    ))}
+
+                    {/* <li className='btn' data-set-theme="dark">Dark</li>
+                                        <li className='btn' data-set-theme="light">Light</li>
+                                        <li className='btn' data-set-theme="aqua">Aqua</li> */}
+                    </ul>
+                </div>
+                </div>
+            </div>
+            </div>
+        )}
         </>
     );
 
