@@ -93,9 +93,9 @@ const Sidebar = () => {
                                 className="material-symbols-rounded text-2xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
-                                bookmark
+                                scrollable_header
                             </span>
-                            <p>Saved</p>
+                            <p>View</p>
 
                         </div>
                     </button>

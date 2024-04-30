@@ -87,6 +87,7 @@ const page = () => {
 
         if (carouselRef?.current && carouselRef?.current?.children[0]) {
             carouselRef?.current?.children[0]?.classList.add('h-full')
+            carouselRef?.current?.children[0]?.classList.remove('overflow-hidden')
         }
 
         // const carouselElement = carouselRef?.current;
@@ -103,29 +104,19 @@ const page = () => {
 
     return (
         <>
-            <main className='absolute left-0 right-0 top-14 bottom-14'>
+            <main className='absolute inset-x-0 top-14 bottom-14'>
                 <div className="relative w-full h-full">
+                    {/* Outer Carousel */}
                     <Carousel ref={carouselRef} orientation="vertical" className='h-full' setApi={setApi}>
-                        <CarouselContent className=' h-full'>
-                            {fetchedPosts.map((post: any, index: number) => (
-                                <>
-                                    {post && post._id && (
-                                        <CarouselItem className='h-full' key={index}>
-                                            {/* <Card className='bg-green-400'>
-                                                <CardContent> */}
-                                                    <Post key={index} post={post} toApprove={false} user={fetchedUser} adminUsers={null} isView={true} />
-                                                {/* </CardContent>
-                                            </Card> */}
-                                            
-                                        </CarouselItem>
-                                    )}
-                                </>
+                        <CarouselContent className='h-full'>
+                            {fetchedPosts.map((post, index) => (
+                            <CarouselItem className='h-full' key={index}>
+                                {/* Post component should be a block-level element */}
+                                <Post key={index} post={post} toApprove={false} user={fetchedUser} adminUsers={null} isView={true} />
+                            </CarouselItem>
                             ))}
                         </CarouselContent>
-                        {/* <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-base-content' />
-                        <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-base-content' /> */}
                     </Carousel>
-
                 </div>
             </main>
         </>

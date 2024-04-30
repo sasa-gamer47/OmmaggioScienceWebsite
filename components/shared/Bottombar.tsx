@@ -90,7 +90,7 @@ const handleThemeChange = (themeName: string) => {
                                 className="material-symbols-rounded text-xl"
                                 style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                             >
-                                bookmark
+                                scrollable_header
                             </span>
                             {/* <p>Saved</p> */}
 

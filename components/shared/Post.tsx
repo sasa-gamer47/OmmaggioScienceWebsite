@@ -6,7 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -41,6 +41,15 @@ import { ToastAction } from '../ui/toast';
 import { createCollection } from '@/lib/actions/collection.actions';
 import Collection from './Collection';
 
+import { type CarouselApi } from "@/components/ui/carousel"
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
+import { Card, CardContent } from '../ui/card';
 
 
 interface Params {
@@ -366,6 +375,43 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
     //     console.log(fetchedUser)
     // }, [user, fetchedUser])
 
+
+    const carouselRef: any = useRef<any>(null)
+
+    const [api, setApi] = useState<CarouselApi>()
+    const [current, setCurrent] = useState(0)
+    const [count, setCount] = useState(0)
+
+    useEffect(() => {
+        // carouselRef?.current?.children[0]?.classList.add('h-full')
+
+        if (carouselRef?.current && carouselRef?.current?.children[0]) {
+            carouselRef?.current?.children[0]?.classList.add('h-full')
+        }
+
+        // const carouselElement = carouselRef?.current;
+        // if (carouselElement && carouselElement?.firstChild) {
+        //     carouselElement?.firstChild.classList.add('h-full');
+        // }
+
+        // carouselRef?.current?.children[0]?.children[0]?.classList.remove('-mt-4')
+    }, [carouselRef])
+
+    useEffect(() => {
+        if (!api) {
+            return
+        }
+    
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap() + 1)
+    
+        api.on("select", () => {
+            setCurrent(api.selectedScrollSnap() + 1)
+        })
+    }, [api])
+
+    const [isFullWidthImage, setIsFullWidthImage] = useState(true)
+
     return (
         <>
             {
@@ -380,7 +426,7 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                                             bookmark
                                         </span>
                                     </button>
-                                    <Image draggable='false' src={post.posts[0]?.url} alt={post.title} objectFit='cover' fill />
+                                        <Image draggable='false' src={post[0].url} alt={post.title} objectFit='cover' fill />
                                     <Link href={`/user/${post.author._id}`} className='absolute w-10/12 left-2 -bottom-4 py-1 px-0 gap-x-3 bg-base-300 rounded-lg flex items-center justify-center'>
                                         <div className='relative rounded-full overflow-hidden'>
                                             <Image draggable='false' src={post.author.photo} alt='user' objectFit='cover' width={35} height={35} />
@@ -521,9 +567,26 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                 </div>
             )}
             {isView && (
+            <>
                 <div className="relative w-full h-full text-base-content">
-                    <Image className='min-h-16' draggable='false' src={post?.posts[0]?.url} alt={post.title} objectFit='cover' fill />
-                    <div className='absolute  border w-12  z-10 top-24 bottom-4 right-0 flex flex-col justify-start  gap-y-4'>
+                    {/* Inner Carousel */}
+                    <Carousel ref={carouselRef} orientation='horizontal' className='h-full w-full' setApi={setApi}>
+                        <CarouselContent className='flex w-full h-full'>
+                        {post.posts.map((imgObj: any, index: number) => (
+                            <CarouselItem className='flex-shrink-0 w-full h-full' key={index}>
+                            {/* Image should cover the item's area without stretching */}
+                                <Image onClick={() => setIsFullWidthImage(!isFullWidthImage)} className={`w-full ${isFullWidthImage ? 'h-full object-cover' : ''}`} draggable='false' src={imgObj.url} alt={post.title} width='2000' height='2000' />
+                                {/* <p className="w-full h-full bg-red-400 text-4xl flex items-center justify-center">{imgObj.url}</p> */}
+                                {/* <img src={imgObj.url} className="w-full h-full object-cover" /> */}
+                            </CarouselItem>
+                        ))}
+                        </CarouselContent>
+                        {/* <CarouselPrevious className='absolute left-4 top-1/2 -translate-y-1/2 bg-base-content' />
+                        <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-base-content' /> */}
+                        <div className="absolute bg-base-200 rounded-lg right-4 top-2 text-base-content p-2 px-4 opacity-75">{current} / {count}</div>
+                    </Carousel>
+                    {/* ... other content ... */}
+                    <div className='absolute  border w-12 z-10 top-24 bottom-4 right-0 flex flex-col justify-start  gap-y-4'>
                             <div className='flex items-center justify-center'>
                                 <Image draggable='false' src={post.author.photo} className='rounded-full' alt='user' objectFit='cover' width={35} height={35} />
                             </div>
@@ -544,7 +607,12 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                                 </span>
                             </div>
                     </div>
+                    <div className="absolute left-2 right-14 bottom-0 h-32 flex flex-col bg-red-400">
+                        <div>{post.title}</div>
+                        <div>{post.description}</div>
+                    </div>
                 </div>
+                </>
             )}
         </>
             

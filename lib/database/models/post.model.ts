@@ -17,6 +17,8 @@ const PostSchema = new Schema({
     isApproved: { type: Boolean, required: true, default: false },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true, default: [] }],
     commentsLength: { type: Number, required: true, default: 0 },
+    likes: { type: Number, required: true, default: 0 },
+    usersHaveLiked: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
 })
 
 const Post = models.Post || model('Post', PostSchema);
