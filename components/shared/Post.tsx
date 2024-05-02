@@ -50,6 +50,9 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Card, CardContent } from '../ui/card';
+import CreateCommentForm from './CreateCommentForm';
+import Comment from './Comment';
+import { getCommentsByPostId } from '@/lib/actions/comment.actions';
 
 
 interface Params {
@@ -75,6 +78,7 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
     const [isLiked, setIsLiked] = useState(false)
     const [addedToCollection, setAddedToCollection] = useState(false)
 
+    const [comments, setComments] = useState<any>([])
 
     const [duration, setDuration] = useState(5000)
 
@@ -82,6 +86,8 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
 
     const pathname = usePathname()
     const router = useRouter()
+
+    const [hasNowLiked, setHasNowLiked] = useState(false)
 
     const approvePost = async () => {
 
@@ -181,6 +187,14 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                 setIsFavorite(false);
             }
 
+            const likesIndex = post.usersHaveLiked.indexOf(user?._id || fetchedUser?._id);
+
+            if (likesIndex !== -1) {
+                setIsLiked(true);
+            } else {
+                setIsLiked(false);
+            }
+
             // console.log('loading posts');
             
         }
@@ -189,12 +203,14 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
     const handleFavorites = async () => {
     // console.log("adding o favorites");
 
-    const index = user ? user?.favorites.indexOf(post._id) : fetchedUser?.favorites.indexOf(post._id);
+        const index = user ? user?.favorites.indexOf(post._id) : fetchedUser?.favorites.indexOf(post._id);
+        const favoritesIndex = post.usersHaveFavored.indexOf(user?._id || fetchedUser?._id);
 
     if (index !== -1) {
         user ? user.favorites.splice(index, 1) : fetchedUser.favorites.splice(index, 1);
         // console.log("removing from favorites");
         setIsFavorite(false);
+    
 
         toast({
             title: "Post removed from favorites.",
@@ -206,6 +222,7 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
         user ? user.favorites.push(post._id) : fetchedUser.favorites.push(post._id);
         // console.log("adding to favorites");
         setIsFavorite(true);
+        
 
         // console.log(user.collections[0].posts.find((postId: string) => postId === post._id))
         
@@ -313,6 +330,31 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
         })
     }
     
+        if (favoritesIndex !== -1) {
+            post.favorites -= 1
+            post.usersHaveFavored.splice(favoritesIndex, 1)
+            // console.log("removing from favorites");
+
+        
+        } else {
+            post.favorites += 1
+
+
+            console.log('info: ', user?._id | fetchedUser?._id)
+            post.usersHaveFavored.push(user?._id || fetchedUser?._id)
+            // console.log("adding to favorites");
+        }
+
+
+        console.log('usersHaveLiked: ', post.usersHaveLiked);
+
+        const updatedPost = await updatePost({
+            userId: user?.id || '',
+            post: post,
+            path: pathname,
+        })
+
+        console.log('favorites updated: ', updatedPost)
 
         console.log(user);
         
@@ -411,6 +453,67 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
     }, [api])
 
     const [isFullWidthImage, setIsFullWidthImage] = useState(true)
+    const [showDescription, setShowDescription] = useState(false)
+
+    const handleLikes = async () => {
+
+        const index = post.usersHaveLiked.indexOf(user?._id || fetchedUser?._id)
+
+        if (index !== -1) {
+            post.likes -= 1
+            post.usersHaveLiked.splice(index, 1)
+            // console.log("removing from likes");
+            setIsLiked(false);
+
+        
+        } else {
+            post.likes += 1
+
+
+            console.log('info: ', user?._id | fetchedUser?._id)
+            post.usersHaveLiked.push(user?._id || fetchedUser?._id)
+            // console.log("adding to likes");
+            setIsLiked(true);
+
+            setHasNowLiked(true)
+
+            setTimeout(() => {
+                setHasNowLiked(false)
+            }, 1000)
+        }
+
+
+        console.log('usersHaveLiked: ', post.usersHaveLiked);
+
+        const updatedPost = await updatePost({
+            userId: user?.id || '',
+            post: post,
+            path: pathname,
+        })
+
+        console.log('likes updated: ', updatedPost)
+        
+    }   
+    
+    const fetchComments = async () => {
+        const comments = await getCommentsByPostId({
+            postId: post._id,
+            childrenLimit: 2,
+            skip: 0,
+        })
+
+        console.log('comments: ', comments)
+
+        setComments(comments)
+    }
+
+    useEffect(() => {
+        fetchComments()
+
+
+    }, [])
+
+    const [showComments, setShowComments] = useState(false)
 
     return (
         <>
@@ -567,10 +670,44 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                 </div>
             )}
             {isView && (
-            <>
-                <div className="relative w-full h-full text-base-content">
+                <>
+
+                <div className="absolute w-full h-full text-base-content overflow-hidden">
+                    {hasNowLiked && (
+                        <div className="z-20 fixed w-full h-full bg-transparent flex items-center justify-center">
+                                <span
+                                    
+                                    className={`material-symbols-rounded text-lg text-red-800 transition duration-00`}
+                                    style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '7rem' }}
+                                >
+                                    favorite
+                            </span>
+                        </div>
+                    )}
+
+                        {showComments && (
+                            <>
+                                <div onClick={() => setShowComments(false)} className="absolute z-30 w-full h-full"></div>
+                                <div className="absolute z-30 w-full h-4/6 bg-base-300 bottom-0 translate-y-4 overflow-y-auto">
+                                    <div className='flex flex-col gap-y-2 h-full'>
+                                        {comments.map((comment: any, index: number) => (
+                                            <>
+                                                {console.log(comment, 'comment')}
+                                                <Comment key={index} user={fetchedUser} comment={comment} />
+                                            </>
+                                        ))}
+                                    </div>
+                                    <div className="absolute bottom-2 w-full h-fit">
+                                        {fetchedUser && (
+                                            <CreateCommentForm user={fetchedUser} postId={post._id} isReply={false} isView={true} />
+                                        )}
+                                    </div>
+                                </div>
+                        </>
+                    )}
+                        
                     {/* Inner Carousel */}
-                    <Carousel ref={carouselRef} orientation='horizontal' className='h-full w-full' setApi={setApi}>
+                    <Carousel ref={carouselRef} orientation='horizontal' className='h-full w-full translate-y-2' setApi={setApi}>
                         <CarouselContent className='flex w-full h-full'>
                         {post.posts.map((imgObj: any, index: number) => (
                             <CarouselItem className='flex-shrink-0 w-full h-full' key={index}>
@@ -585,33 +722,68 @@ const Post = ({ user, post, toApprove, adminUsers, isView }: Params) => {
                         <CarouselNext className='absolute right-4 top-1/2 -translate-y-1/2 bg-base-content' /> */}
                         <div className="absolute bg-base-200 rounded-lg right-4 top-2 text-base-content p-2 px-4 opacity-75">{current} / {count}</div>
                     </Carousel>
-                    {/* ... other content ... */}
-                    <div className='absolute  border w-12 z-10 top-24 bottom-4 right-0 flex flex-col justify-start  gap-y-4'>
+                        {/* ... other content ... */}
+
+
+                    
+                        
+                    <div className='absolute border w-12 z-10 top-24 bottom-4 right-0 flex flex-col justify-start  gap-y-4'>
                             <div className='flex items-center justify-center'>
                                 <Image draggable='false' src={post.author.photo} className='rounded-full' alt='user' objectFit='cover' width={35} height={35} />
                             </div>
-                            <div className='flex items-center justify-center'>
+                            <div onClick={() => handleLikes()} className='flex items-center justify-center cursor-pointer flex-col'>
                                 <span
                                 className={`material-symbols-rounded text-lg ${isLiked ? 'text-red-800' : 'text-gray-100'}`}
                                     style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '2.5rem' }}
                                 >
                                     favorite
                                 </span>
+                                <div className='text-lg font-bold text-base-content'>{post.likes}</div>
                             </div>
-                            <div className='flex items-center justify-center'>
+                            <div onClick={() => handleFavorites()} className='flex flex-col items-center justify-center cursor-pointer'>
                                 <span
                                 className={`material-symbols-rounded text-lg ${isFavorite ? 'text-yellow-300' : 'text-gray-100'}`}
                                     style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '2.5rem' }}
                                 >
                                     bookmark
                                 </span>
+                                <div className='text-lg font-bold text-base-content'>{post.favorites}</div>
                             </div>
+                            <div onClick={() => setShowComments(!showComments)} className='flex flex-col items-center justify-center cursor-pointer'>
+                                <span
+                                className={`material-symbols-rounded text-lg text-gray-100}`}
+                                    style={{ fontVariationSettings: `'FILL' 1, 'wght' 300`, fontSize: '2.5rem' }}
+                                >
+                                    comment
+                                </span>
+                                <div className='text-lg font-bold text-base-content'>{post.comments.length}</div>
+                            </div>
+                        </div>
+                        <div onClick={() => setShowDescription(!showDescription)} className={`${showDescription ? '' : 'translate-y-1/2 bottom-2'} text-base-content transition duration-300 absolute left-2 right-14 bottom-0 h-auto rounded-t-lg`}>
+                            <div className="relative w-full h-full flex">
+                                <div className={`absolute inset-0 rounded-md bg-black ${showDescription ? 'opacity-50' : 'opacity-10'}`}></div>
+                                <div className={`w-full h-full z-10 p-2 rounded-lg flex flex-col`}>
+                                    <div className='text-lg font-semibold'>{post.title}</div>
+                                    <div className='text-sm'>{post.description.trim().split(/\s+/).slice(0, 20).join(' ')}...</div>
+                                    <div className="flex flex-col">
+                                        {showDescription && post.tags.length > 0 && post.tags.map((tag: any, index: number) => (
+                                            <div className='cursor-pointer font-semibold w-fit max-w-20'>
+                                                <Link href={`/search?query=''&tag=${tag}`}>
+                                                    #{tag}
+                                                </Link>
+                                            </div>    
+                                        ))}
+                                    </div>
+                                    <div className={`${showDescription ? '' : 'absolute top-1/2 right-2 -translate-y-1/2'} text-md text-right font-bold mb-2`}>{showDescription ? 'less' : 'more'} info</div>  
+                                    {showDescription && (
+                                        <Link href={`/post/${post._id}`}>
+                                            <div className="absolute bottom-2 left-2 btn btn-sm text-sm font-bold">View post</div>
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="absolute left-2 right-14 bottom-0 h-32 flex flex-col bg-red-400">
-                        <div>{post.title}</div>
-                        <div>{post.description}</div>
-                    </div>
-                </div>
                 </>
             )}
         </>

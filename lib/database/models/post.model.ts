@@ -19,6 +19,10 @@ const PostSchema = new Schema({
     commentsLength: { type: Number, required: true, default: 0 },
     likes: { type: Number, required: true, default: 0 },
     usersHaveLiked: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
+    views: { type: Number, required: true, default: 0 },
+    usersHaveViewed: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
+    favorites: { type: Number, required: true, default: 0 },
+    usersHaveFavored: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, default: [] }],
 })
 
 const Post = models.Post || model('Post', PostSchema);

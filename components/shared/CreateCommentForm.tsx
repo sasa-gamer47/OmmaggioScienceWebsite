@@ -34,11 +34,13 @@ const CreateCommentForm = ({
     postId,
     isReply,
     commentId,
+    isView,
     }: {
     user: any;
     postId?: string;
     isReply: boolean;
     commentId?: string;
+    isView?: boolean;
     }) => {
     
     const pathname = usePathname();
@@ -171,9 +173,9 @@ const CreateCommentForm = ({
         <Form {...form}>
         <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full flex items-center justify-between gap-x-2"
+            className={`${isView ? 'mb-2' : ''} h-fit w-full flex items-center justify-between gap-x-2`}
         >
-            <div className="w-11/12">
+            <div className={`${isView ? 'w-9/12' : 'w-11/12'} `}>
             <FormField
                 control={form.control}
                 name="comment"
@@ -194,13 +196,13 @@ const CreateCommentForm = ({
             />
                 </div>
                 {!isPublishing && (
-                    <Button type="submit" className="w-1/12">
+                    <Button type="submit" className={`${isView ? 'w-3/12' : 'w-1/12'} `}>
                         Comment
                     </Button>
 
                 )}
                 {isPublishing && (
-                    <Button className="w-1/12" disabled>
+                    <Button className={`${isView ? 'w-3/12' : 'w-1/12'} `} disabled>
                         Publishing...
                     </Button>
                 )}

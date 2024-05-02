@@ -89,7 +89,50 @@ const populateCommentChildren = async (commentQuery: any, limit = 3, skip = 0) =
     }
 };
 
+export async function getCommentsByPostId({ postId, childrenLimit, skip }: { postId: string, childrenLimit: number, skip: number }) {
+    try {
+        await connectToDatabase()
 
+
+
+        // const commentQuery = Comment.findById(commentId)
+
+        const comments = await Comment.find({ parentPost: postId })
+            .populate({
+                path: 'author',
+                model: User,
+                select: '_id username photo role'
+            })
+            .populate({
+                path: 'children',
+                model: Comment,
+                select: '_id author comment children isChild parentPost parentComment createdAt updatedAt likes dislikes usersHaveLiked usersHaveDisliked',
+                options: { sort: { 'createdAt': -1 } },
+                populate: {
+                    path: 'author',
+                    model: User,
+                    select: '_id username photo role'
+                }
+            })
+            
+
+        // console.log('comments: ', comments);
+
+
+            for (const comment of comments) {
+                comment.children = await populateCommentChildren(Comment.find({ '_id': { $in: comment.children } }), childrenLimit, skip);
+            }
+            // console.log('comments: ', comments);
+        
+        
+        // const comment = await populateCommentChildren(commentQuery, childrenLimit)
+
+        
+        return JSON.parse(JSON.stringify(comments))
+    } catch (error) {
+        handleError(error)
+    }
+}
 
 export async function getCommentById(commentId: string, childrenLimit: number) {
     try {

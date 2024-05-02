@@ -87,7 +87,7 @@ const Sidebar = () => {
 
                         </div>
                     </button>
-                    <button className="w-16 h-16 btn" title="Saved">
+                    <Link href='/view' className="w-16 h-16 btn" title="View">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
                                 className="material-symbols-rounded text-2xl"
@@ -98,7 +98,7 @@ const Sidebar = () => {
                             <p>View</p>
 
                         </div>
-                    </button>
+                    </Link>
                     <div>
                         <SignedIn>
                             {/* <UserButton /> */}

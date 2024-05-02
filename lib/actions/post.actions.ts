@@ -162,7 +162,7 @@ export async function getPosts({ query, limit = 6, page, isApproved, categories 
         //     tag.trim();
         // }
 
-        console.log('tags: ', tags);
+        // console.log('tags: ', tags);
 
         const titleCondition = query ? { title: { $regex: query, $options: 'i' } } : {}
         
@@ -179,7 +179,7 @@ export async function getPosts({ query, limit = 6, page, isApproved, categories 
             $and: [titleCondition, isApprovedCondition, subjectsCondition, tagsCondition, subjectCondition]  //, categoryCondition ? { category: categoryCondition._id } : {}],
         }
 
-        console.log('subject: ', subject);
+        // console.log('subject: ', subject);
 
         const skipAmount = (Number(page) - 1) * limit
         const postsQuery = Post.find(conditions)
@@ -241,6 +241,8 @@ export async function updatePost({ userId, post, path }: UpdatePostParams) {
         { new: true }
         )
         revalidatePath(path)
+
+        // console.log(updatedPost);
 
         return JSON.parse(JSON.stringify(updatedPost))
     } catch (error) {

@@ -84,7 +84,7 @@ const handleThemeChange = (themeName: string) => {
 
                         </div>
                     </button>
-                    <button className="w-14 h-14 btn" title="Saved">
+                    <Link href='/view' className="w-14 h-14 btn" title="View">
                         <div className='w-full h-full flex flex-col items-center justify-center'>
                             <span
                                 className="material-symbols-rounded text-xl"
@@ -95,7 +95,7 @@ const handleThemeChange = (themeName: string) => {
                             {/* <p>Saved</p> */}
 
                         </div>
-                    </button>
+                    </Link>
                     <button
                         className={`w-14 h-14 btn ${showSettings? 'bg-base-100' : ''}`}
                         title="Settings"
